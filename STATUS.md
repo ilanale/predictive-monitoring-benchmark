@@ -24,3 +24,4 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 - 02:17 · A2 · WS1 done (ws-data merged, 4bcfc70): 127,610 / 60,412 / 2,484 segments; 14 tests OK; build 31 s. Judgment calls → RD-06..RD-14. Launching A4 data audit (G2).
 - 02:19 · A1 · G1 passed: compat 2212f02 + baseline 1a55115 merged (76a441d); 17 tests OK; synthetic smoke AUC single_agg 0.898 / prefix_agg 0.828. Pushing court-adaptation.
 - 02:28 · A4 · G2 FAIL: D2 phase-1 exit used the termination date (leaks trial events and the R3 target); also self-counting in filed_last30/90 and net_flow. A2 fix cycle (≤ 30 min) → RD-18..20; A4 then re-audits.
+- 02:27 · A2 · G2 fixes merged (65166d6): D2 phase-1 exit = phase-3 entry (2,555 post-exit events removed, R3 leak gone), self-exclusion in filed/closed/net-flow; 18 tests OK. A4 re-audit running.
