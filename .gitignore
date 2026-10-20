@@ -89,7 +89,7 @@ ENV/
 .ropeproject
 
 # court-adaptation: never commit data, predictions or local envs
-data/
+data/*
 !data/README.md
 results/predictions/
 results/queue.log
