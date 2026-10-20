@@ -9,7 +9,7 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 | Bootstrap | 02:19 | ✅ 02:16 |
 | G1 port | 03:19 | ✅ 02:19 |
 | G2 data | 04:04 | ✅ 02:31 (re-audit PASS after D2 fix) |
-| G3 pipeline | 05:19 | |
+| G3 pipeline | 05:19 | ✅ 02:47 |
 | G4 review → Tier 1a | 05:34 | |
 | Tier-1b projection / cut check | 07:34 | |
 | G5 Tier 1 + Tier-2 cut-off | 08:04 | |
@@ -26,3 +26,5 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 - 02:28 · A4 · G2 FAIL: D2 phase-1 exit used the termination date (leaks trial events and the R3 target); also self-counting in filed_last30/90 and net_flow. A2 fix cycle (≤ 30 min) → RD-18..20; A4 then re-audits.
 - 02:27 · A2 · G2 fixes merged (65166d6): D2 phase-1 exit = phase-3 entry (2,555 post-exit events removed, R3 leak gone), self-exclusion in filed/closed/net-flow; 18 tests OK. A4 re-audit running.
 - 02:31 · A4 · G2 PASS on re-audit (33c74fd): 0 mismatches over all 190,506 segments, 800 feature cells, full leakage scan, twins, M values. Waiting for A3 (G3).
+- 02:47 · A3 · G3 passed: ws-pipeline merged (39ee839); 45 tests OK; fast path = upstream on 1,000 real segments × 6 tasks × 2 methods (max diff 3e-17, identical predictions); 2% dry run of all 84 Tier-1 jobs in 8 min. Open: regression worse than the median baseline and T2 AUC < 0.5 on the 2% sample → watch at full scale.
+- 02:49 · orchestrator · Tier 1a queue launched under caffeinate (RD-23); A4 G4 leakage review launched.

@@ -24,3 +24,6 @@ D1–D12 are fixed (see `DECISIONS.md`). Every other decision taken during the r
 | 02:28 | RD-18 | orchestrator (A4 finding) | D2 phase-1 exit date | raw `phase1_exit_date` (= termination) / `phase3_entry_date` | `phase3_entry_date` | D2: phase 2 has zero length, so phase 1 ends when trial starts; the raw date leaked trial/verdict events and the R3 target (G2 blocker) |
 | 02:28 | RD-19 | orchestrator (A4 finding) | Self-counting in `filed_last30/90`, `net_flow` | keep / exclude self | exclude self | consistent with RD-06 |
 | 02:28 | RD-20 | orchestrator (A4 finding) | `PP_n_distinct_judges` over all judges listed on an event | first judge only / all listed | all listed, documented | uses only information known at the event |
+| 02:48 | RD-21 | A3 | CV prefix gap during tuning | 1 (upstream) / 3 | 3; the 20k-segment tuning cap is an evenly spaced time-ordered sample | fits the 20-min tuning cap |
+| 02:48 | RD-22 | A3 | Same-day event order | original row order / upstream sort (timestamp, then activity) | upstream sort | dates are day-level, so there is no true within-day order; keeps fast path = upstream exactly |
+| 02:48 | RD-23 | orchestrator | Start Tier 1a while A4 runs the G4 leakage review | wait for G4 / start now, wipe results if G4 fails | start now | the review is read-only; ~30 min saved; any G4 blocker → delete `results/` and rerun |
