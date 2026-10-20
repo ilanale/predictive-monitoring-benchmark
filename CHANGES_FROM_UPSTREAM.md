@@ -55,3 +55,13 @@ export PYTHONPATH=$PWD:$PWD/experiments PPM_LOGS_DIR=<dir with the csv logs> PPM
 python experiments/optimize_params.py <dataset> <params_dir> <n_iter> <bucket> <encoding> <cls>
 python experiments/experiments.py <dataset> <params_dir> <results_dir> <bucket> <encoding> <cls> <gap> <n_iter>
 ```
+
+## test — synthetic log and compat baseline (validation only)
+
+| File | What | Why |
+|---|---|---|
+| `experiments/dataset_confs.py` | dataset `synthetic` (`synthetic.csv` under `logs_dir`) | lets the unchanged upstream scripts run on the synthetic log |
+| `tests/fixtures/make_synthetic_log.py` | deterministic (seed 22) 500-case log in the upstream processed format, trace lengths 2–30, learnable deviant/regular label, upstream time features | the paper's datasets are not available; validates the port end to end. Writes `data/synthetic/synthetic.csv` (git-ignored) |
+| `tests/fixtures/extract_best_params_prefix.py` | port of the notebook's per-bucket best-params cell | `experiments.py` needs `{nr_events: params}` for `prefix_*` |
+| `tests/compat_baseline.py`, `tests/fixtures/compat_baseline/` | outputs of the compat code with fixed XGBoost params (single_agg, prefix_agg): AUC results files from `experiments.py`, encoded test features (first 200 single-bucket prefixes; first 70 of prefix buckets 1/5/10), predictions for all test prefixes | regression baseline (DoD-4) |
+| `tests/test_compat_smoke.py` | `python -m unittest discover -s tests` reproduces the baseline (AUC rows identical, features max abs diff < 1e-9, predictions identical) | guards later changes against silent behaviour drift |
