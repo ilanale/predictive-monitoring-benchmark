@@ -1,5 +1,7 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 from sklearn.base import TransformerMixin
 import pandas as pd
+import numpy as np
 from time import time
 
 class PreviousStateTransformer(TransformerMixin):
@@ -23,14 +25,15 @@ class PreviousStateTransformer(TransformerMixin):
     def transform(self, X, y=None):
         start = time()
         
-        dt_last = X.groupby(self.case_id_col).nth(-2)
+        # compat: since pandas 2.0 nth() keeps the original row index; restore the old case-id index
+        dt_last = X.groupby(self.case_id_col).nth(-2).set_index(self.case_id_col)
         
         # transform numeric cols
         dt_transformed = dt_last[self.num_cols]
         
         # transform cat cols
         if len(self.cat_cols) > 0:
-            dt_cat = pd.get_dummies(dt_last[self.cat_cols])
+            dt_cat = pd.get_dummies(dt_last[self.cat_cols], dtype=np.uint8)  # compat: old default dtype (pandas>=2 gives bool)
             dt_transformed = pd.concat([dt_transformed, dt_cat], axis=1)
 
         # add 0 rows where previous value did not exist

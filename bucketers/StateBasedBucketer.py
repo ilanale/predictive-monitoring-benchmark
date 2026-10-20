@@ -1,3 +1,4 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 import pandas as pd
 import numpy as np
 from time import time
@@ -31,7 +32,7 @@ class StateBasedBucketer(object):
         dt_transformed = pd.merge(dt_encoded, self.dt_states, how='left')
         dt_transformed.fillna(-1, inplace=True)
         
-        return dt_transformed["state"].astype(int).as_matrix()
+        return dt_transformed["state"].astype(int).to_numpy()  # compat: as_matrix removed
     
     
     def fit_predict(self, X, y=None):

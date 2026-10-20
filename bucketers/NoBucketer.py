@@ -1,3 +1,4 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 import pandas as pd
 import numpy as np
 from time import time
@@ -17,7 +18,7 @@ class NoBucketer(object):
     
     def predict(self, X, y=None):
         
-        return np.ones(len(X[self.case_id_col].unique()), dtype=np.int)
+        return np.ones(len(X[self.case_id_col].unique()), dtype=int)  # compat: np.int removed in numpy>=1.24
     
     
     def fit_predict(self, X, y=None):

@@ -1,3 +1,4 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 import EncoderFactory
 from DatasetManager import DatasetManager
 import BucketFactory
@@ -87,10 +88,12 @@ def create_and_evaluate_model(args):
                                                 max_depth=int(args['max_depth']),
                                                 colsample_bytree=args['colsample_bytree'],
                                                 min_child_weight=int(args['min_child_weight']),
-                                                seed=random_state)
+                                                random_state=random_state,  # compat: 'seed' alias deprecated in xgboost; same RNG seed
+                                                n_jobs=n_jobs)  # compat: thread cap (PPM_N_JOBS, default 4); no effect on results
 
                     elif cls_method == "logit":
                         cls = LogisticRegression(C=2**args['C'],
+                                                 solver="liblinear",  # compat: sklearn<0.22 default solver; keeps old behaviour
                                                  random_state=random_state)
 
                     elif cls_method == "svm":
@@ -165,6 +168,7 @@ datasets = [dataset_ref] if dataset_ref not in dataset_ref_to_datasets else data
 methods = encoding_dict[cls_encoding]
     
 train_ratio = 0.8
+n_jobs = int(os.environ.get("PPM_N_JOBS", "4"))  # compat: cap xgboost threads (upstream used all cores)
 n_splits = 3
 random_state = 22
 

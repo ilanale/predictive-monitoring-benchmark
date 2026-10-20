@@ -1,3 +1,4 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 from sklearn.base import TransformerMixin
 import pandas as pd
 import numpy as np
@@ -28,11 +29,15 @@ class AggregateTransformer(TransformerMixin):
         
         # transform numeric cols
         if len(self.num_cols) > 0:
-            dt_numeric = X.groupby(self.case_id_col)[self.num_cols].agg({'mean':np.mean, 'max':np.max, 'min':np.min, 'sum':np.sum, 'std':np.std})
-            dt_numeric.columns = ['_'.join(col).strip() for col in dt_numeric.columns.values]
+            # compat: pandas>=1.0 removed dict-renaming agg. Named aggregation reproduces the old
+            # output: function-major column order (mean, max, min, sum, std), names "<func>_<col>",
+            # std with ddof=1 (np.std was dispatched to the cythonized groupby std, ddof=1).
+            named_aggs = {"%s_%s" % (func, col): pd.NamedAgg(column=col, aggfunc=func)
+                          for func in ['mean', 'max', 'min', 'sum', 'std'] for col in self.num_cols}
+            dt_numeric = X.groupby(self.case_id_col)[self.num_cols].agg(**named_aggs)
             
         # transform cat cols
-        dt_transformed = pd.get_dummies(X[self.cat_cols])
+        dt_transformed = pd.get_dummies(X[self.cat_cols], dtype=np.uint8)  # compat: old default dtype (pandas>=2 gives bool)
         dt_transformed[self.case_id_col] = X[self.case_id_col]
         del X
         if self.boolean:
