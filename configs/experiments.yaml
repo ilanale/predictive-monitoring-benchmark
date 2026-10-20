@@ -1,12 +1,27 @@
-# Experiment config for the court adaptation (filled in by A3; see PLAN.md §5).
-# Skeleton written at bootstrap.
+# Experiment config for the court adaptation (PLAN.md §5). Read by court/run_queue.py and court/run.py.
 budget:
   hours_total: 8
-  tuning: {n_iter: 10, cv_folds: 3, max_train_segments: 20000, cap_minutes: 20}
+  tuning: {n_iter: 10, cv_folds: 3, max_train_segments: 20000, cap_minutes: 20, gap: 3}
   final_fit: {cap_minutes: 10}
   xgb_n_jobs: 8
+  gap_train: 3          # C7 training gap; test gap is always 1
+  max_prefix_cap: 40    # C7: L = min(40, ceil(q90 in-phase length)); positive class for classification
+data_dir: data/processed
+results_dir: results
+tuned_fs: FS-ALL        # hyperparameters tuned on FS-ALL, reused for the other FS of the same (task, method)
+# queue order inside every tier: T1, R1, T2, R2, then T3, R3 (D11)
 tasks: [court_p1_clf, court_p1_reg, court_p2_clf, court_p2_reg, court_p3_clf, court_p3_reg]
 feature_sets: [FS-M, FS-MP, FS-B0, FS-B0+P, FS-B0+G, FS-ALL]
+tier_order: [tier1a, tier1b, tier2]
 tiers:
-  tier1a: {methods: [single_agg], learner: xgboost}
-  tier1b: {methods: [prefix_agg], learner: xgboost}
+  tier1a: {methods: [single_agg], learners: [xgboost]}
+  tier1b: {methods: [prefix_agg], learners: [xgboost]}
+  tier2:
+    # (1) FS-B0 re-tune for T1/R1 and (2) D1 / (3) D8 sensitivity are listed as extra jobs;
+    # (4) other bucketings on FS-B0 and FS-ALL need upstream bucketers (phase 2); (5) RF.
+    methods: [state_agg, cluster_agg, single_laststate]
+    learners: [xgboost]
+    feature_sets: [FS-B0, FS-ALL]
+    extra_jobs:
+      - {task: court_p1_clf, method: single_agg, fs: FS-ALL+S, learner: xgboost}
+      - {task: court_p1_reg, method: single_agg, fs: FS-ALL+S, learner: xgboost}
