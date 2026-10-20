@@ -1,3 +1,4 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 from sklearn.base import TransformerMixin
 import pandas as pd
 import numpy as np
@@ -28,10 +29,12 @@ class IndexBasedTransformer(TransformerMixin):
         grouped = X.groupby(self.case_id_col, as_index=False)
         
         if self.max_events is None:
-            self.max_events = grouped.size().max()
+            # compat: with as_index=False, size() now returns a DataFrame; use the per-case counts
+            self.max_events = X.groupby(self.case_id_col).size().max()
         
         
-        dt_transformed = pd.DataFrame(grouped.apply(lambda x: x.name), columns=[self.case_id_col])
+        # compat: grouped.apply(lambda x: x.name) -> sorted group keys (same content, no apply on group frames)
+        dt_transformed = pd.DataFrame({self.case_id_col: X.groupby(self.case_id_col).size().index.values})
         for i in range(self.max_events):
             dt_index = grouped.nth(i)[[self.case_id_col] + self.cat_cols + self.num_cols]
             dt_index.columns = [self.case_id_col] + ["%s_%s"%(col, i) for col in self.cat_cols] + ["%s_%s"%(col, i) for col in self.num_cols]
@@ -41,7 +44,7 @@ class IndexBasedTransformer(TransformerMixin):
         # one-hot-encode cat cols
         if self.create_dummies:
             all_cat_cols = ["%s_%s"%(col, i) for col in self.cat_cols for i in range(self.max_events)]
-            dt_transformed = pd.get_dummies(dt_transformed, columns=all_cat_cols).drop(self.case_id_col, axis=1)
+            dt_transformed = pd.get_dummies(dt_transformed, columns=all_cat_cols, dtype=np.uint8).drop(self.case_id_col, axis=1)  # compat: old default dtype
         
         # fill missing values with 0-s
         if self.fillna:

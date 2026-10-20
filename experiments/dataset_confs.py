@@ -1,3 +1,4 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 import os
 
 case_id_col = {}
@@ -13,7 +14,7 @@ dynamic_num_cols = {}
 static_num_cols = {}
 filename = {}
 
-logs_dir = "labeled_logs_csv_processed"
+logs_dir = os.environ.get("PPM_LOGS_DIR", "labeled_logs_csv_processed")  # compat: overridable via env var PPM_LOGS_DIR; default unchanged
 
 #### Traffic fines settings ####
 
