@@ -235,3 +235,18 @@ dynamic_cat_cols[dataset] = ["Activity", "Resource", "priority"]
 static_cat_cols[dataset] = ["case_type", "region"]
 dynamic_num_cols[dataset] = ["cost", "timesincelastevent", "timesincecasestart", "timesincemidnight", "event_nr", "month", "weekday", "hour", "open_cases"]
 static_num_cols[dataset] = ["amount", "age"]
+
+
+#### Court tasks (C1): registered from <PPM_COURT_DATA_DIR>/court_columns.json by court/court_confs.py ####
+# Only when PPM_COURT_DATA_DIR is set, so upstream datasets are unaffected. Dataset names:
+# court_p{k}_{clf|reg}__{FS} (and __{FS}+S for the D8 sensitivity run). Adds the dicts task_type,
+# regression_label_col, global_cols and feature_set.
+if os.environ.get("PPM_COURT_DATA_DIR"):
+    import sys as _sys
+    _repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if _repo not in _sys.path:
+        _sys.path.insert(0, _repo)
+    from court.court_confs import register as _register_court
+    _court_dir = os.environ["PPM_COURT_DATA_DIR"]
+    _register_court(_sys.modules[__name__], os.path.join(_court_dir, "court_columns.json"), _court_dir,
+                    with_sensitivity=True, fmt=os.environ.get("PPM_COURT_FORMAT", "csv"))

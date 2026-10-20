@@ -126,7 +126,7 @@ def apply_columns(pm, train_names):
 class FastEncoder:
     def __init__(self, spec, case_col="segment_id", act_col="Activity", ts_col="timestamp",
                  label_col="label", reg_label_col="remaining_in_phase", pos_label="deviant",
-                 n_hist_col="n_hist", dtype=np.float32, max_chunk_cells=4e7, layout=None):
+                 n_hist_col="n_hist", dtype=np.float32, max_chunk_cells=1.5e7, layout=None):
         self.spec = spec
         self.case_col, self.act_col, self.ts_col = case_col, act_col, ts_col
         self.label_col, self.reg_label_col, self.pos_label = label_col, reg_label_col, pos_label
@@ -169,24 +169,6 @@ class FastEncoder:
             self.build_vocab(df)
         names, kinds, sources = self._layout()
         rows, j, h = prefix_ends(df, max_len, gap, self.case_col, self.n_hist_col)
-        X = np.zeros((len(rows), len(names)), dtype=self.dtype)
-        starts, ends = segment_bounds(df, self.case_col)
-        n_cells_per_row = max(1, len(names))
-        chunk_rows = int(max(1000, self.max_chunk_cells // n_cells_per_row))
-        # chunk = consecutive segments with <= chunk_rows events (at least one segment)
-        out_pos = 0
-        s = 0
-        while s < len(starts):
-            e = s
-            while e < len(starts) and (ends[e] - starts[s] <= chunk_rows or e == s):
-                e += 1
-            lo, hi = starts[s], ends[e - 1]
-            sel = (rows >= lo) & (rows < hi)
-            r_local = rows[sel] - lo
-            block = self._encode_chunk(df.iloc[lo:hi], r_local)
-            X[out_pos:out_pos + len(r_local)] = block
-            out_pos += len(r_local)
-            s = e
         seg = df[self.case_col].to_numpy()[rows]
         plen = h + j
         meta = pd.DataFrame({
@@ -202,9 +184,31 @@ class FastEncoder:
         if self.reg_label_col in df:
             ff = df.groupby(self.case_col, sort=False)[self.reg_label_col].ffill().to_numpy()
             meta["y_reg"] = ff[rows].astype(float)
+        # output rows sorted by prefix case id (upstream groupby order); blocks are written straight
+        # to their sorted position, so the matrix is never copied
         order = np.argsort(meta["prefix_case_id"].to_numpy().astype(str), kind="stable")
+        dest = np.empty(len(order), dtype=np.int64)
+        dest[order] = np.arange(len(order))
         meta = meta.iloc[order].reset_index(drop=True)
-        return PrefixMatrix(X[order], names, kinds, sources, meta)
+        X = np.zeros((len(rows), len(names)), dtype=self.dtype)
+        starts, ends = segment_bounds(df, self.case_col)
+        n_cells_per_row = max(1, len(names))
+        chunk_rows = int(max(1000, self.max_chunk_cells // n_cells_per_row))
+        # chunk = consecutive segments with <= chunk_rows events (at least one segment)
+        out_pos = 0
+        s = 0
+        while s < len(starts):
+            e = s
+            while e < len(starts) and (ends[e] - starts[s] <= chunk_rows or e == s):
+                e += 1
+            lo, hi = starts[s], ends[e - 1]
+            sel = (rows >= lo) & (rows < hi)
+            r_local = rows[sel] - lo
+            block = self._encode_chunk(df.iloc[lo:hi], r_local)
+            X[dest[out_pos:out_pos + len(r_local)]] = block
+            out_pos += len(r_local)
+            s = e
+        return PrefixMatrix(X, names, kinds, sources, meta)
 
     def _encode_chunk(self, d, r):
         sp = self.spec
@@ -237,27 +241,11 @@ class FastEncoder:
             cnt = cs[r] - np.where(before[:, None] >= 0, cs[np.maximum(before, 0)], 0)
             parts.append(cnt)
             del oh, cs
-        # dynamic num: running mean/max/min/sum/std (NaN skipped), shifted by first value for stability
+        # dynamic num: running mean/max/min/sum/std, bit-identical to pandas groupby (running_num_stats)
         if sp.dynamic_num:
             A = d[sp.dynamic_num].to_numpy(dtype=float)
-            valid = ~np.isnan(A)
-            g = pd.DataFrame(A).groupby(seg)
-            x0 = g.transform("first").to_numpy()
-            Z = np.where(valid, A - np.nan_to_num(x0), 0.0)
-            stack = pd.DataFrame(np.hstack([valid.astype(float), Z, Z * Z])).groupby(seg).cumsum().to_numpy()[r]
             k = A.shape[1]
-            cnt, s1, s2 = stack[:, :k], stack[:, k:2 * k], stack[:, 2 * k:]
-            x0r = np.nan_to_num(x0[r])
-            with np.errstate(invalid="ignore", divide="ignore"):
-                mean = np.where(cnt > 0, x0r + s1 / cnt, 0.0)
-                tot = np.where(cnt > 0, x0r * cnt + s1, 0.0)
-                var = (s2 - s1 * s1 / cnt) / (cnt - 1)
-                std = np.where(cnt > 1, np.sqrt(np.maximum(var, 0.0)), 0.0)
-            mx = pd.DataFrame(np.where(valid, A, -np.inf)).groupby(seg).cummax().to_numpy()[r]
-            mn = pd.DataFrame(np.where(valid, A, np.inf)).groupby(seg).cummin().to_numpy()[r]
-            mx = np.where(np.isfinite(mx), mx, 0.0)
-            mn = np.where(np.isfinite(mn), mn, 0.0)
-            stats = {"mean": mean, "max": mx, "min": mn, "sum": tot, "std": std}
+            stats = running_num_stats(A, seg, r)
             for _, c, s in agg_feature_names(list(range(k)), self.layout):
                 parts.append(stats[s][:, c:c + 1])
         if sp.last_cols:
@@ -284,3 +272,69 @@ class FastEncoder:
         first_val = g.transform("first").to_numpy()
         fp = first_pos[r]
         return np.where(~np.isnan(fp) & (fp <= r[:, None]), first_val[r], np.nan)
+
+
+_SPLIT = 134217729.0  # 2**27 + 1 (Dekker split)
+
+
+def _fma(a, b, c):
+    """Correctly rounded a*b + c with numpy float64 (error-free transformations).
+
+    pandas' cython ``group_var`` is compiled with floating-point contraction, so its Welford update
+    ``M2 += (val - mean) * (val - oldmean)`` is a fused multiply-add; emulating it keeps the running
+    std bit-identical to ``groupby().std()`` (checked against ``math.fma`` on 2M random triples)."""
+    p = a * b
+    t = _SPLIT * a; ah = t - (t - a); al = a - ah
+    t = _SPLIT * b; bh = t - (t - b); bl = b - bh
+    e = ((ah * bh - p) + ah * bl + al * bh) + al * bl
+    s = p + c; bb = s - p; err = (p - (s - bb)) + (c - bb)
+    return s + (err + e)
+
+
+def running_num_stats(A, seg, r):
+    """mean/max/min/sum/std of the numeric columns ``A`` over each prefix ending at local row r.
+
+    Rows of a segment are contiguous and in event order. Accumulators follow pandas' cython groupby
+    kernels step by step (NaN skipped): Kahan-compensated sum for sum and mean (``group_sum``,
+    ``group_mean``), Welford with FMA for var (``group_var``, ddof=1), so the result at a prefix end
+    equals ``groupby(prefix).agg(...)`` on the materialised prefix bit for bit. Empty -> 0 (fillna)."""
+    n, k = A.shape
+    nseg = int(seg.max()) + 1 if n else 0
+    starts = np.flatnonzero(np.r_[True, seg[1:] != seg[:-1]]) if n else np.array([], int)
+    pos = np.arange(n) - np.repeat(starts, np.diff(np.r_[starts, n]))
+    order = np.argsort(pos, kind="stable")
+    bnd = np.searchsorted(pos[order], np.arange(pos.max() + 2 if n else 1))
+    r_pos = pos[r]
+    r_order = np.argsort(r_pos, kind="stable")
+    rbnd = np.searchsorted(r_pos[r_order], np.arange(pos.max() + 2 if n else 1))
+    sumx = np.zeros((nseg, k)); comp = np.zeros((nseg, k)); nobs = np.zeros((nseg, k))
+    mean = np.zeros((nseg, k)); M2 = np.zeros((nseg, k))
+    mx = np.full((nseg, k), -np.inf); mn = np.full((nseg, k), np.inf)
+    o_sum = np.zeros((len(r), k)); o_n = np.zeros((len(r), k)); o_m2 = np.zeros((len(r), k))
+    o_mx = np.zeros((len(r), k)); o_mn = np.zeros((len(r), k))
+    last_p = int(r_pos.max()) if len(r) else -1
+    with np.errstate(invalid="ignore", divide="ignore", over="ignore"):
+        for p in range(last_p + 1):
+            rows = order[bnd[p]:bnd[p + 1]]
+            sg = seg[rows]; v = A[rows]; ok = ~np.isnan(v)
+            nb = nobs[sg] + ok
+            nobs[sg] = nb
+            sx, cp = sumx[sg], comp[sg]
+            y = v - cp; t = sx + y; c = (t - sx) - y
+            c = np.where(c != c, 0.0, c)
+            comp[sg] = np.where(ok, c, cp); sumx[sg] = np.where(ok, t, sx)
+            om = mean[sg]; nm = om + (v - om) / nb
+            m2 = _fma(v - nm, v - om, M2[sg])
+            mean[sg] = np.where(ok, nm, om); M2[sg] = np.where(ok, m2, M2[sg])
+            mx[sg] = np.where(ok, np.fmax(mx[sg], v), mx[sg]); mn[sg] = np.where(ok, np.fmin(mn[sg], v), mn[sg])
+            sel = r_order[rbnd[p]:rbnd[p + 1]]
+            if len(sel):
+                ss = seg[r[sel]]
+                o_sum[sel] = sumx[ss]; o_n[sel] = nobs[ss]; o_m2[sel] = M2[ss]
+                o_mx[sel] = mx[ss]; o_mn[sel] = mn[ss]
+        has = o_n > 0
+        return {"mean": np.where(has, o_sum / o_n, 0.0),
+                "sum": np.where(has, o_sum, 0.0),
+                "max": np.where(has, o_mx, 0.0),
+                "min": np.where(has, o_mn, 0.0),
+                "std": np.where(o_n > 1, np.sqrt(o_m2 / (o_n - 1)), 0.0)}

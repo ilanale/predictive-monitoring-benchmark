@@ -105,7 +105,10 @@ def get_spec(fs, cols_json, available=None):
             for c in TIME_FEATURES + ["open_cases"]:
                 if c not in order:
                     order.append(c)
-        kinds[kind] = [c for c in order if c in col_view]
+        # column order = view order (M, P, PP, B0G, G, S), as court/court_confs.feature_columns
+        # registers them in dataset_confs -> same FeatureUnion column order as upstream
+        members = set(order)
+        kinds[kind] = [c for c in col_view if c in members]
     unassigned = set(col_view) - set(sum(kinds.values(), []))
     if unassigned:
         raise ValueError("columns of %s with no kind in court_columns.json: %s" % (fs, sorted(unassigned)))

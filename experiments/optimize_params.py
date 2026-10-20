@@ -18,7 +18,8 @@ from sys import argv
 import pickle
 from collections import defaultdict
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor  # C3
+from sklearn.metrics import mean_absolute_error  # C4
 import xgboost as xgb
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -76,12 +77,12 @@ def create_and_evaluate_model(args):
                     feature_combiner = FeatureUnion([(method, EncoderFactory.get_encoder(method, **cls_encoder_args)) for method in methods])
 
                     if cls_method == "rf":
-                        cls = RandomForestClassifier(n_estimators=500,
+                        cls = rf_model(n_estimators=500,
                                                      max_features=args['max_features'],
                                                      random_state=random_state)
 
                     elif cls_method == "xgboost":
-                        cls = xgb.XGBClassifier(objective='binary:logistic',
+                        cls = xgb_model(objective=xgb_objective,
                                                 n_estimators=500,
                                                 learning_rate= args['learning_rate'],
                                                 subsample=args['subsample'],
@@ -109,19 +110,28 @@ def create_and_evaluate_model(args):
 
                     if cls_method == "svm":
                         preds = pipeline.decision_function(dt_test_bucket)
+                    elif is_regression:
+                        preds = pipeline.predict(dt_test_bucket)  # C3: log1p(days)
                     else:
                         preds_pos_label_idx = np.where(cls.classes_ == 1)[0][0]
                         preds = pipeline.predict_proba(dt_test_bucket)[:,preds_pos_label_idx]
             
             if "prefix" in method_name:
                 auc = 0.5
-                if len(set(test_y)) == 2: 
+                if is_regression:
+                    # C4: score = -MAE in days (higher is better, so the loss below is +MAE and the
+                    # per-bucket extraction of the best trial (max score) stays unchanged)
+                    auc = -mean_absolute_error(np.expm1(test_y), np.expm1(preds))
+                elif len(set(test_y)) == 2: 
                     auc = roc_auc_score(test_y, preds)
                 scores[bucket] += auc
             preds_all.extend(preds)
             test_y_all.extend(test_y)
 
-        score += roc_auc_score(test_y_all, preds_all)
+        if is_regression:
+            score += -mean_absolute_error(np.expm1(test_y_all), np.expm1(preds_all))  # C4: loss = +MAE (days)
+        else:
+            score += roc_auc_score(test_y_all, preds_all)
     
     if "prefix" in method_name:
         for k, v in args.items():
@@ -187,6 +197,18 @@ for dataset_name in datasets:
                         'dynamic_cat_cols': dataset_manager.dynamic_cat_cols,
                         'dynamic_num_cols': dataset_manager.dynamic_num_cols, 
                         'fillna': True}
+
+    # C1/C3/C8 (court adaptation; upstream datasets: classification, no global cols -> unchanged)
+    is_regression = dataset_manager.task_type == "regression"
+    xgb_model = xgb.XGBRegressor if is_regression else xgb.XGBClassifier
+    xgb_objective = 'reg:squarederror' if is_regression else 'binary:logistic'
+    rf_model = RandomForestRegressor if is_regression else RandomForestClassifier
+    cls_encoder_args['global_cols'] = dataset_manager.global_cols
+    methods = list(encoding_dict[cls_encoding])
+    if dataset_manager.global_cols and "agg" in methods:
+        methods = methods + ["lastG"]  # C8: agg + last value of G columns
+    if not (dataset_manager.dynamic_cat_cols or dataset_manager.dynamic_num_cols):
+        methods = ["static"]  # FS-M: static columns only (an empty "agg" encoder would fail)
 
     # determine min and max (truncated) prefix lengths
     min_prefix_length = 1

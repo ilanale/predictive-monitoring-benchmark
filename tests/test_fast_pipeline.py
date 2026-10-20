@@ -31,7 +31,7 @@ class TestFastEqualsUpstream(unittest.TestCase):
         R, yreg, pnr = ref.encode(ref.generate_prefix_data(df, L, gap), spec, layout)
         self.assertEqual(list(R.columns), pm.names)
         self.assertEqual(list(R.index), list(pm.meta["prefix_case_id"]))
-        self.assertLess(np.abs(R.to_numpy() - pm.X).max(), 1e-6)
+        self.assertEqual(np.abs(R.to_numpy() - pm.X).max(), 0.0)  # bit-identical in float64
         np.testing.assert_allclose(yreg.to_numpy(), pm.meta["y_reg"].to_numpy())
         np.testing.assert_array_equal(pnr.to_numpy(), pm.meta["prefix_nr"].to_numpy())
 

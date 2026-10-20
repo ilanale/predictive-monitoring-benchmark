@@ -17,7 +17,8 @@ from sys import argv
 import pickle
 from collections import defaultdict
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor  # C3
+from sklearn.metrics import mean_absolute_error  # C4
 import xgboost as xgb
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
@@ -83,6 +84,18 @@ for dataset_name in datasets:
                         'dynamic_cat_cols': dataset_manager.dynamic_cat_cols,
                         'dynamic_num_cols': dataset_manager.dynamic_num_cols, 
                         'fillna': True}
+
+    # C1/C3/C8 (court adaptation; upstream datasets: classification, no global cols -> unchanged)
+    is_regression = dataset_manager.task_type == "regression"
+    xgb_model = xgb.XGBRegressor if is_regression else xgb.XGBClassifier
+    xgb_objective = 'reg:squarederror' if is_regression else 'binary:logistic'
+    rf_model = RandomForestRegressor if is_regression else RandomForestClassifier
+    cls_encoder_args['global_cols'] = dataset_manager.global_cols
+    methods = list(encoding_dict[cls_encoding])
+    if dataset_manager.global_cols and "agg" in methods:
+        methods = methods + ["lastG"]  # C8: agg + last value of G columns
+    if not (dataset_manager.dynamic_cat_cols or dataset_manager.dynamic_num_cols):
+        methods = ["static"]  # FS-M: static columns only (an empty "agg" encoder would fail)
 
     # determine min and max (truncated) prefix lengths
     min_prefix_length = 1
@@ -162,12 +175,12 @@ for dataset_name in datasets:
                     feature_combiner = FeatureUnion([(method, EncoderFactory.get_encoder(method, **cls_encoder_args)) for method in methods])
 
                     if cls_method == "rf":
-                        cls = RandomForestClassifier(n_estimators=500,
+                        cls = rf_model(n_estimators=500,
                                                      max_features=current_args['max_features'],
                                                      random_state=random_state)
 
                     elif cls_method == "xgboost":
-                        cls = xgb.XGBClassifier(objective='binary:logistic',
+                        cls = xgb_model(objective=xgb_objective,
                                                 n_estimators=500,
                                                 learning_rate= current_args['learning_rate'],
                                                 subsample=current_args['subsample'],
@@ -206,6 +219,8 @@ for dataset_name in datasets:
                         _ = bucketer.predict(group)
                         if cls_method == "svm":
                             pred = pipeline.decision_function(group)
+                        elif is_regression:
+                            pred = pipeline.predict(group)  # C3: log1p(days)
                         else:
                             preds_pos_label_idx = np.where(cls.classes_ == 1)[0][0]
                             pred = pipeline.predict_proba(group)[:,preds_pos_label_idx]
@@ -233,12 +248,20 @@ for dataset_name in datasets:
             fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, -1, ii, "online_time_std", np.std(online_event_times[ii])))
 
         dt_results = pd.DataFrame({"actual": test_y_all, "predicted": preds_all, "nr_events": nr_events_all})
-        for nr_events, group in dt_results.groupby("nr_events"):
+        if is_regression:
+            # C4/D10: MAE in days (labels and predictions back from log1p)
+            dt_days = pd.DataFrame({"actual": np.expm1(dt_results.actual), "predicted": np.expm1(dt_results.predicted),
+                                    "nr_events": dt_results.nr_events})
+            for nr_events, group in dt_days.groupby("nr_events"):
+                fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, nr_events, -1, "mae", mean_absolute_error(group.actual, group.predicted)))
+            fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, -1, -1, "mae", mean_absolute_error(dt_days.actual, dt_days.predicted)))
+        for nr_events, group in (dt_results.iloc[:0] if is_regression else dt_results).groupby("nr_events"):
             if len(set(group.actual)) < 2:
                 fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, nr_events, -1, "auc", np.nan))
             else:
                 fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, nr_events, -1, "auc", roc_auc_score(group.actual, group.predicted)))
-        fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, -1, -1, "auc", roc_auc_score(dt_results.actual, dt_results.predicted)))
+        if not is_regression:
+            fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, -1, -1, "auc", roc_auc_score(dt_results.actual, dt_results.predicted)))
 
         online_event_times_flat = [t for iter_online_event_times in online_event_times for t in iter_online_event_times]
         fout.write("%s;%s;%s;%s;%s;%s;%s\n"%(dataset_name, method_name, cls_method, -1, -1, "online_time_avg", np.mean(online_event_times_flat)))

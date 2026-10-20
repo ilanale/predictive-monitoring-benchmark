@@ -66,8 +66,12 @@ def run_tuning(job_id, cfg, data_dir, results_dir, sample_frac=None, train_frac=
     df = data_io.load_task_log(task, data_dir, sample_frac=sample_frac)
     cols = data_io.load_columns(data_dir)
     spec = get_spec(fs, cols, df.columns)
-    L = data_io.max_prefix_length(df, task_type, cap=int(cfg.get("budget", {}).get("max_prefix_cap", 40)))
-    train, _, split_ts = data_io.split_data_strict(df)
+    from court import upstream
+    dm = upstream.dataset_manager(task, fs, data_dir)
+    L = min(int(b.get("max_prefix_cap", 40)), dm.get_pos_case_length_quantile(df, 0.90))  # C7
+    train, test = dm.split_data_strict(df, 0.8, split="temporal")
+    split_ts = data_io.segment_start_times(test).min() if len(test) else None
+    del test
     start = data_io.segment_start_times(train).sort_values(kind="mergesort")
     keep = runner.systematic_segments(start.index.to_numpy(), cap=cap)
     train = prepare_log(train[train["segment_id"].isin(set(keep))])
