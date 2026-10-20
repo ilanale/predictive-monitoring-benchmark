@@ -86,10 +86,7 @@ def run_tuning(job_id, cfg, data_dir, results_dir, sample_frac=None, train_frac=
         tr = allp.subset_rows(np.isin(seg_of, list(tr_ids)))
         te = allp.subset_rows(np.isin(seg_of, list(te_ids)))
         tr_events = train[train["segment_id"].isin(tr_ids)]
-        if task_type == "classification":
-            fb = float((tr_events["label"] == "deviant").mean())
-        else:
-            fb = float(np.log1p(np.median(tr.meta["y_reg"])))
+        fb = float(dm.get_class_ratio(tr_events))  # upstream class_ratios[cv_iter] (C5: median)
         fold_data.append((tr, te, fb))
     trials_log = []
 

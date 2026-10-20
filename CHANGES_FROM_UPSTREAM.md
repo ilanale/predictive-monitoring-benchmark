@@ -65,3 +65,28 @@ python experiments/experiments.py <dataset> <params_dir> <results_dir> <bucket> 
 | `tests/fixtures/extract_best_params_prefix.py` | port of the notebook's per-bucket best-params cell | `experiments.py` needs `{nr_events: params}` for `prefix_*` |
 | `tests/compat_baseline.py`, `tests/fixtures/compat_baseline/` | outputs of the compat code with fixed XGBoost params (single_agg, prefix_agg): AUC results files from `experiments.py`, encoded test features (first 200 single-bucket prefixes; first 70 of prefix buckets 1/5/10), predictions for all test prefixes | regression baseline (DoD-4) |
 | `tests/test_compat_smoke.py` | `python -m unittest discover -s tests` reproduces the baseline (AUC rows identical, features max abs diff < 1e-9, predictions identical) | guards later changes against silent behaviour drift |
+
+## research — court adaptation (PLAN.md §4, C1–C9)
+
+All changes are switched on only for datasets registered by `court/court_confs.py` (names
+`court_p{k}_{clf|reg}__{FS}`), i.e. only when `PPM_COURT_DATA_DIR` is set. Upstream datasets keep
+`task_type = classification` and no `n_hist` offset, so their code path is the compat one
+(`tests/test_compat_smoke.py` stays green; `tests/test_upstream_adapted.py` checks that the
+in-phase prefix generation with `n_hist = 0` equals the original one).
+
+| File | What changed | Why (PLAN.md) |
+|---|---|---|
+| `experiments/dataset_confs.py` | when `PPM_COURT_DATA_DIR` is set, calls `court.court_confs.register` (adds dicts `task_type`, `regression_label_col`, `global_cols`, `feature_set`; court tasks × 6 FS, plus `+S`) | C1, RD-03 |
+| `experiments/DatasetManager.py` | reads `task_type`, `regression_label_col`, `global_cols`; `n_hist_col = "n_hist"` for court datasets | C1 |
+| `experiments/DatasetManager.py` | `get_label`: regression → `groupby(case).last()[remaining_in_phase]`; `get_label_numeric` → `log1p(days)` | C2, D6, D10 |
+| `experiments/DatasetManager.py` | `get_class_ratio` (small-bucket fallback) → `log1p(median remaining days)`; `get_stratified_split_generator` / `get_idx_split_generator` → `KFold` for regression | C5 |
+| `experiments/DatasetManager.py` | `generate_prefix_data` → `_generate_in_phase_prefix_data` for court data: lengths `n_hist + j`, j = 1, 1+gap, … ≤ max_length; `prefix_nr = j`; ids `case` / `case_<n_hist+j>`; `case_length` = in-phase length capped | C6, D9 |
+| `experiments/DatasetManager.py` | `get_pos_case_length_quantile` → quantile of the in-phase length (positive class; all segments for regression) | C7 |
+| `experiments/DatasetManager.py` | `split_data_strict` (court): segments ordered by first in-phase event; test start = earliest test segment's phase entry; train events on/after it cut | PLAN.md §4 "Split", D9 (traces start at filing) |
+| `bucketers/PrefixLengthBucketer.py` | court prefixes (with `n_hist`) are bucketed by `prefix_nr` (in-phase length) | C6 |
+| `experiments/experiments.py`, `experiments/optimize_params.py` | `XGBRegressor(objective='reg:squarederror')` / `RandomForestRegressor` and `predict` for regression; same search space and `n_estimators=500` | C3 |
+| `experiments/experiments.py` | regression results rows: `mae` (days, after `expm1`) per `nr_events` and overall | C4 |
+| `experiments/optimize_params.py` | regression score = −MAE (days), so the loss is +MAE and the per-bucket best-trial extraction (max score) is unchanged | C4 |
+| `experiments/experiments.py`, `experiments/optimize_params.py` | encoders: `agg` + `lastG` when the FS has G columns; `static` only for FS-M (no dynamic columns) | C8, FS-M |
+| `experiments/EncoderFactory.py`, new `transformers/LastValueOfColsTransformer.py` | method `lastG`: last non-null value of the G columns, named `last_<col>`, `fillna(0)` | C8 |
+| new `court/fast_pipeline.py` (+ `court/verify_fast_path.py`) | prefix features without materialising the prefix log; bit-identical to the adapted upstream path (running Kahan sums and FMA-Welford reproduce pandas' cython groupby mean/sum/std); identical XGBoost predictions on 1,000-segment samples of all six tasks | C9 |

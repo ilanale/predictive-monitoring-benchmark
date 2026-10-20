@@ -212,10 +212,8 @@ def run_job(job_id, cfg, data_dir, results_dir, sample_frac=None, train_frac=Non
     params, params_source = load_params(results_dir, task, method, learner)
     if params_source == "default":
         flags = (flags + ";" if flags else "") + "default_params"
-    if task_type == "classification":
-        fallback = float((train_events["label"] == "deviant").mean())  # upstream get_class_ratio(train)
-    else:
-        fallback = float(np.log1p(np.median(tr.meta["y_reg"])))     # C5: train median
+    # empty-bucket fallback: upstream get_class_ratio(train) (C5: log1p train median for regression)
+    fallback = float(dm.get_class_ratio(train_events))
     pred, models = fit_predict_buckets(tr, te, method, learner, task_type, params, n_jobs, fallback)
     out = pd.DataFrame({"segment_id": te.meta["segment_id"], "prefix_len": te.meta["prefix_nr"]})
     if task_type == "classification":
