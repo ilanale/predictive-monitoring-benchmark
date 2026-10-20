@@ -1,5 +1,7 @@
+# Modified by ilanale/predictive-monitoring-benchmark for court-case adaptation — see CHANGES_FROM_UPSTREAM.md
 from sklearn.base import TransformerMixin
 import pandas as pd
+import numpy as np
 from time import time
 
 class StaticTransformer(TransformerMixin):
@@ -30,7 +32,7 @@ class StaticTransformer(TransformerMixin):
         
         # transform cat cols
         if len(self.cat_cols) > 0:
-            dt_cat = pd.get_dummies(dt_first[self.cat_cols])
+            dt_cat = pd.get_dummies(dt_first[self.cat_cols], dtype=np.uint8)  # compat: old default dtype (pandas>=2 gives bool)
             dt_transformed = pd.concat([dt_transformed, dt_cat], axis=1)
 
         # fill NA with 0 if requested
