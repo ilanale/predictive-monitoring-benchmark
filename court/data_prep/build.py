@@ -135,6 +135,19 @@ def write_report(report, spec, path):
           "this case excluded by subtracting its own indicator; windows = (t − w, t]; judge = case-table `District_Judge` "
           "(judge features 0 when missing); judge median case length over that judge's cases closed strictly before t (0 if none). "
           "Computed from all cases after D3 (not only the window).", ""]
+    L += ["## Judgment calls (not fixed by D1–D12 / SCHEMA; conservative option chosen)", "",
+          "1. Case table: `wc -l` is 155,525 (no trailing newline), so only its MD5 is checked; the event log is checked on MD5 and line count.",
+          "2. D4 cases (`phase1_completed` but `phase2_entered = False`): their phase-2 dates are blanked, so they also never count as \"in phase 2\" in the global features.",
+          "3. D3 cases are dropped from the global (court-state) counts too (50 of 155,525 cases).",
+          "4. \"Open at t\" = state at the end of day t (filed ≤ t < terminated); the case itself is always excluded. Judge history median uses closures strictly before t; 0 when the judge has none (with `G_judge_hist_n_closed`).",
+          "5. Judge-level G features use the case-table `District_Judge`; they are 0 when it is missing (13,870 cases). Magistrate load uses `Magistrate_Judge`, 0 when missing.",
+          "6. `Defendants_pending_counts`, `unique_district_judge_count`, `unique_magistrate_judge_count` look like end-of-case values and are excluded (not features in any view).",
+          "7. Rare levels: counted per phase file (static categoricals per segment, `judge` per event row); like upstream, the count uses the whole file.",
+          "8. `P_attr_duplicates` (collapsed duplicate count, ≥ 1) is exported as a numeric event attribute in view P.",
+          "9. `PP_prev_phase_days_1/2` exist in all three files (0 where not applicable) so that one `court_columns.json` serves every phase; D2 cases have `PP_prev_phase_days_2 = 0`.",
+          "10. `PP_events_last30/90` and all cumulative counters use only events at positions ≤ i in the (date, row) order, so later events of the same day are not counted.",
+          "11. Missing static categoricals → \"missing\"; missing numeric meta → 0 (none of the exported numeric meta columns has missing values).",
+          "12. Segments without an in-phase event strictly before the exit (D7) are dropped; in phase 1 all 875 are positives (answer filed before/at the first docketed event), a small selection effect noted for the thesis.", ""]
     L += ["## Excluded columns and why", "", "| Column(s) | Reason |", "|---|---|"]
     for c, why in spec["excluded"].items():
         L.append(f"| `{c}` | {why} |")
@@ -142,7 +155,8 @@ def write_report(report, spec, path):
           "## Outputs", "", "| File | Rows | Size (B) |", "|---|---|---|"]
     for n, v in r["outputs"].items():
         L.append(f"| {n} | {v.get('rows', '')} | {v['size']:,} |")
-    L += ["", "## Runtime", "", f"- Total {r['runtime_s']:.0f} s; peak RSS {r['peak_rss_gb']:.2f} GB.", ""]
+    L += ["", "## Runtime", "", f"- Total {r['runtime_s']:.0f} s; peak RSS {r['peak_rss_gb']:.2f} GB "
+          "(the first run additionally reads the 2.9 GB log, ≈ 7 s, and computes the input MD5s, both cached in `data/interim/`).", ""]
     with open(path, "w") as f:
         f.write("\n".join(L))
 
