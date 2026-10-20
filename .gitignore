@@ -87,3 +87,11 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# court-adaptation: never commit data, predictions or local envs
+data/
+!data/README.md
+results/predictions/
+results/queue.log
+.venv/
+.DS_Store

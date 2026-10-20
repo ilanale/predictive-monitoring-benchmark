@@ -1,0 +1,12 @@
+# Experiment config for the court adaptation (filled in by A3; see PLAN.md §5).
+# Skeleton written at bootstrap.
+budget:
+  hours_total: 8
+  tuning: {n_iter: 10, cv_folds: 3, max_train_segments: 20000, cap_minutes: 20}
+  final_fit: {cap_minutes: 10}
+  xgb_n_jobs: 8
+tasks: [court_p1_clf, court_p1_reg, court_p2_clf, court_p2_reg, court_p3_clf, court_p3_reg]
+feature_sets: [FS-M, FS-MP, FS-B0, FS-B0+P, FS-B0+G, FS-ALL]
+tiers:
+  tier1a: {methods: [single_agg], learner: xgboost}
+  tier1b: {methods: [prefix_agg], learner: xgboost}
