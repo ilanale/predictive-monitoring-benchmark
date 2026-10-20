@@ -1,0 +1,207 @@
+{
+ "D_counts_all": {
+  "D1": 1431,
+  "D2": 90,
+  "D3": 50,
+  "D4": 582
+ },
+ "window_cases_after_D3": 128485,
+ "D_counts_window": {
+  "D1": 1037,
+  "D2": 83,
+  "D3": 47,
+  "D4": 501
+ },
+ "my_segments_built": {
+  "1": 128485,
+  "2": 60424,
+  "3": 2497
+ },
+ "my_D7_dropped": {
+  "1": {
+   "0": 0,
+   "1": 875
+  },
+  "2": {
+   "0": 0,
+   "1": 12
+  },
+  "3": {
+   "0": 7,
+   "1": 6
+  }
+ },
+ "check1_full_population": {
+  "label": 0,
+  "entry_date": 0,
+  "exit_date": 0,
+  "n_events": 0,
+  "last_event_date": 0,
+  "n_hist": 0,
+  "only_in_mine": 0,
+  "only_in_output": 0,
+  "segments_any_mismatch": 0,
+  "mismatch_by_phase_and_flag": {
+   "p1": {
+    "total": 0,
+    "D2": 0,
+    "D1": 0,
+    "D4": 0
+   },
+   "p2": {
+    "total": 0,
+    "D2": 0,
+    "D1": 0,
+    "D4": 0
+   },
+   "p3": {
+    "total": 0,
+    "D2": 0,
+    "D1": 0,
+    "D4": 0
+   }
+  },
+  "examples": [],
+  "only_in_mine_examples": [],
+  "only_in_output_examples": []
+ },
+ "check1_sample": {
+  "n": 200,
+  "strata": {
+   "p1_lab0": 34,
+   "p1_lab1": 34,
+   "p2_lab0": 33,
+   "p2_lab1": 33,
+   "p3_lab0": 33,
+   "p3_lab1": 33
+  },
+  "n_flagged_D1_D2_D4": 68,
+  "flag_breakdown": {
+   "D1": 11,
+   "D2": 50,
+   "D4": 7
+  },
+  "mismatching_segments": 0,
+  "mismatch_fields": {},
+  "examples": []
+ },
+ "check3": {
+  "p1": {
+   "rows": 1498497,
+   "ts_ge_exit": 0,
+   "remaining_ne_exit_minus_ts": 0,
+   "in_phase_ne_ts_ge_entry": 0,
+   "n_hist_ne_count_out_of_phase": 0,
+   "hist_after_in_phase": 0,
+   "ts_not_sorted": 0,
+   "event_nr_ne_pos+1": 0,
+   "segments_with_no_in_phase": 0,
+   "filing_year_range": [
+    2003,
+    2016
+   ],
+   "ucids_filed_outside_window": 0,
+   "filing_year_ne_raw": 0,
+   "D3_cases_present": 0,
+   "segment_id_ne_ucid|pk": 0
+  },
+  "p2": {
+   "rows": 2491716,
+   "ts_ge_exit": 0,
+   "remaining_ne_exit_minus_ts": 0,
+   "in_phase_ne_ts_ge_entry": 0,
+   "n_hist_ne_count_out_of_phase": 0,
+   "hist_after_in_phase": 0,
+   "ts_not_sorted": 0,
+   "event_nr_ne_pos+1": 0,
+   "segments_with_no_in_phase": 0,
+   "filing_year_range": [
+    2003,
+    2016
+   ],
+   "ucids_filed_outside_window": 0,
+   "filing_year_ne_raw": 0,
+   "D3_cases_present": 0,
+   "segment_id_ne_ucid|pk": 0
+  },
+  "p3": {
+   "rows": 331873,
+   "ts_ge_exit": 0,
+   "remaining_ne_exit_minus_ts": 0,
+   "in_phase_ne_ts_ge_entry": 0,
+   "n_hist_ne_count_out_of_phase": 0,
+   "hist_after_in_phase": 0,
+   "ts_not_sorted": 0,
+   "event_nr_ne_pos+1": 0,
+   "segments_with_no_in_phase": 0,
+   "filing_year_range": [
+    2003,
+    2016
+   ],
+   "ucids_filed_outside_window": 0,
+   "filing_year_ne_raw": 0,
+   "D3_cases_present": 0,
+   "segment_id_ne_ucid|pk": 0
+  },
+  "feature_cols_matching_outcome_pattern": [
+   "P_attr_transferred_entry"
+  ],
+  "never_features_in_views": [],
+  "S_cols_in_main_views": [],
+  "D8_suspects_outside_S": [],
+  "S_view": [
+   "S_plaintiffs_count",
+   "S_plaintiffs_counsels_count",
+   "S_Defendants_count",
+   "S_Defendants_counsels_count",
+   "S_plaintiffs_share_pro_hac_vice",
+   "S_Defendants_share_pro_hac_vice"
+  ],
+  "file_cols_not_accounted": [],
+  "typed_lists_vs_views": []
+ },
+ "check2_targeted": {
+  "n_cells": 300,
+  "n_G_or_open_cases": 200,
+  "n_P_PP": 100,
+  "distinct_columns_covered": 14,
+  "by_phase": {
+   "1": 128,
+   "2": 102,
+   "3": 70
+  },
+  "mismatches": 0,
+  "mismatch_by_col": {},
+  "mismatch_by_explanation": {},
+  "timestamp_misaligned": 0,
+  "judge_other_cells_checked": 0,
+  "examples": []
+ },
+ "extra_full_population": {
+  "p1": {
+   "rows": 1498497,
+   "open_cases_mismatch": 0,
+   "prev_days_nonzero": 0
+  },
+  "p2": {
+   "rows": 2491716,
+   "open_cases_mismatch": 0,
+   "prev_days_1_mismatch": 0,
+   "prev_days_1_mismatch_D2_rows": 0,
+   "prev_days_1_eq_raw_D2": 0,
+   "D2_rows": 0,
+   "D2_rows_remaining_recoverable_from_features": null,
+   "prev_days_2_nonzero": 0
+  },
+  "p3": {
+   "rows": 331873,
+   "open_cases_mismatch": 0,
+   "prev_days_1_mismatch": 0,
+   "prev_days_1_mismatch_D2_rows": 0,
+   "prev_days_1_eq_raw_D2": 0,
+   "D2_rows": 6077,
+   "D2_rows_remaining_recoverable_from_features": 0,
+   "prev_days_2_mismatch": 0
+  }
+ }
+}
