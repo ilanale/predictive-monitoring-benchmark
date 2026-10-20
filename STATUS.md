@@ -6,7 +6,7 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 
 | Gate | Due (IDT) | State |
 |---|---|---|
-| Bootstrap | 02:19 | |
+| Bootstrap | 02:19 | ✅ 02:16 |
 | G1 port | 03:19 | |
 | G2 data | 04:04 | |
 | G3 pipeline | 05:19 | |
@@ -19,3 +19,5 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 
 ## Log (one line per milestone: time · who · what)
 - 02:04 · orchestrator · T0. Fork cloned, branch `court-adaptation`, upstream push disabled, `data/raw` symlinks.
+- 02:16 · orchestrator · Bootstrap done: commits fe65c1a..ac4ddf7, worktrees ws-port/ws-data/ws-pipeline, caffeinate running. Launching A1 (port) and A2 (data).
+- 02:20 · orchestrator · A1 port and A2 data launched; A3 pipeline starts early on court/-only modules (RD-05).
