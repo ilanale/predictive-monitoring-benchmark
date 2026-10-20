@@ -13,10 +13,10 @@ NaT = pd.NaT
 
 
 def case(ucid, filing, term, p2=None, p2x=None, p3=None, p3x=None, p2_entered=None, p3_completed=False,
-         p1_completed=None, judge="J1", mag=None, ctype="cv"):
+         p1_completed=None, judge="J1", mag=None, ctype="cv", p1x=None):
     p2_entered = (p2 is not None) if p2_entered is None else p2_entered
     p3_entered = p3 is not None
-    p1x = p2 or p3 or term
+    p1x = p1x or p2 or p3 or term
     return {
         "ucid": ucid, "filing_date": filing, "terminating_date": term,
         "phase1_entered": True, "phase1_completed": p2_entered if p1_completed is None else p1_completed,
@@ -68,7 +68,9 @@ def base_fixture():
         # D1: flagged phase 2, no entry date, no trial
         case("D1", "2005-01-01", "2005-06-01", p2=None, p2_entered=True),
         # D2: trial with no answer
-        case("D2", "2005-01-01", "2006-06-01", p2=None, p2_entered=True, p3="2005-08-01", p3_completed=False),
+        # (as in the raw case table, its phase1_exit_date is the termination date)
+        case("D2", "2005-01-01", "2006-06-01", p2=None, p2_entered=True, p3="2005-08-01", p3_completed=False,
+             p1x="2006-06-01"),
         # D3: inverted phase 2
         case("D3", "2005-01-01", "2006-01-01", p2="2005-06-01", p2x="2005-05-01"),
         # D4: answered on termination day: phase1_completed but phase2_entered False
@@ -117,6 +119,20 @@ class TestLabels(unittest.TestCase):
         self.assertEqual(self.labels["D2|p3"], "regular")
         p3 = self.tables[3][self.tables[3].segment_id == "D2|p3"]
         self.assertEqual(p3.PP_prev_phase_days_2.iloc[0], 0)
+
+    def test_D2_phase1_ends_at_phase3_entry(self):
+        p1 = self.tables[1][self.tables[1].segment_id == "D2|p1"]
+        self.assertTrue((p1.exit_date == "2005-08-01").all())
+        self.assertEqual(list(p1.timestamp), ["2005-01-01", "2005-03-01"])  # trial on 2005-08-01 excluded
+        self.assertEqual(list(p1.remaining_in_phase), [212, 153])
+        p3 = self.tables[3][self.tables[3].segment_id == "D2|p3"]
+        self.assertEqual(p3.PP_prev_phase_days_1.iloc[0], 212)  # p3 entry - filing, not termination - filing
+        self.assertFalse((p3.remaining_in_phase == p3.PP_prev_phase_days_1 - p3.timesincecasestart).all())
+        # global phase-1 interval of D2 ends at the phase-3 entry
+        c = phase_fixes.apply_fixes(self.cases, {}, log=lambda *a: None)[0]
+        G = global_features.global_features(c, np.array([list(c.ucid).index("A")]),
+                                            np.array([(pd.Timestamp("2005-09-01") - DAY0).days]))
+        self.assertEqual(G.G_court_open_phase1.iloc[0], 0)
 
     def test_D3_dropped(self):
         self.assertFalse(any(s.startswith("D3|") for s in self.labels))
@@ -204,11 +220,15 @@ class TestGlobalBruteForce(unittest.TestCase):
             exp = {
                 "open_cases": sum(isopen(r, t) for r in others),
                 "G_court_open_same_type": sum(isopen(r, t) for r in others if r["case_type"] == me["case_type"]),
-                "G_court_filed_last30": sum(t - 30 < r["filing_date"] <= t for r in C),
-                "G_court_closed_last90": sum(t - 90 < r["terminating_date"] <= t for r in C),
+                "G_court_filed_last30": sum(t - 30 < r["filing_date"] <= t for r in others),
+                "G_court_closed_last90": sum(t - 90 < r["terminating_date"] <= t for r in others),
+                "G_court_net_flow90": sum(t - 90 < r["filing_date"] <= t for r in others)
+                - sum(t - 90 < r["terminating_date"] <= t for r in others),
                 "G_judge_open": sum(isopen(r, t) for r in mine),
                 "G_judge_open_same_type": sum(isopen(r, t) for r in mine if r["case_type"] == me["case_type"]),
-                "G_judge_filed_last90": 0 if jm else sum(t - 90 < r["filing_date"] <= t for r in C if r["District_Judge"] == me["District_Judge"]),
+                "G_judge_filed_last90": sum(t - 90 < r["filing_date"] <= t for r in mine),
+                "G_judge_net_flow30": sum(t - 30 < r["filing_date"] <= t for r in mine)
+                - sum(t - 30 < r["terminating_date"] <= t for r in mine),
                 "G_mag_open": 0 if me["Magistrate_Judge"] is None else sum(isopen(r, t) for r in others if r["Magistrate_Judge"] == me["Magistrate_Judge"]),
             }
             for p in (1, 2, 3):
