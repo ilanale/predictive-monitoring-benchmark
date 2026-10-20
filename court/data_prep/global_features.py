@@ -5,7 +5,8 @@ Definition of "open at t" (day-level, state at the END of day t):
     a case is in phase j at t  <=>  phase_j_entry <= t < phase_j_exit   (intervals with exit <= entry ignored)
 so a case filed on t counts as open on t, a case closed on t does not. "Excluding this case"
 subtracts this case's own indicator under the same rule (so the result counts other cases only).
-Windows: filed/closed in the last w days = date in (t - w, t].
+Windows: filed/closed in the last w days = date in (t - w, t], this case excluded (RD-06),
+so net_flow = filed - closed counts other cases only.
 Judge history: median length (terminating - filing, days) of the judge's cases closed STRICTLY
 before t (conservative), 0 if none; G_judge_hist_n_closed = their number.
 Judge = the case's District_Judge in the case table; judge features are 0 when it is missing.
@@ -100,9 +101,13 @@ def global_features(cases, q_case, q_day, q_phase=None):
     out["G_court_open_same_type"] = open_in(tg, f, e)
     for k in (1, 2, 3):
         out[f"G_court_open_phase{k}"] = open_in(zero, A[f"s{k}"], A[f"x{k}"])
+    def self_in_window(x, w):
+        xx = x[qc]
+        return ((t - w < xx) & (xx <= t)).astype(np.int64)
+
     for w in (30, 90):
-        out[f"G_court_filed_last{w}"] = _window_count(f.astype(np.int64), t, w)
-        out[f"G_court_closed_last{w}"] = _window_count(e.astype(np.int64), t, w)
+        out[f"G_court_filed_last{w}"] = _window_count(f.astype(np.int64), t, w) - self_in_window(f, w)
+        out[f"G_court_closed_last{w}"] = _window_count(e.astype(np.int64), t, w) - self_in_window(e, w)
         out[f"G_court_net_flow{w}"] = out[f"G_court_filed_last{w}"] - out[f"G_court_closed_last{w}"]
     jg = A["judge_codes"].astype(np.int64)
     jmiss = A["judge_missing"][qc]
@@ -116,8 +121,8 @@ def global_features(cases, q_case, q_day, q_phase=None):
             np.asarray(q_phase) - 1, [out["G_judge_open_phase1"], out["G_judge_open_phase2"], out["G_judge_open_phase3"]])
     qk = jg[qc] * B + t
     for w in (30, 90):
-        out[f"G_judge_filed_last{w}"] = _window_count(jg * B + f.astype(np.int64), qk, w)
-        out[f"G_judge_closed_last{w}"] = _window_count(jg * B + e.astype(np.int64), qk, w)
+        out[f"G_judge_filed_last{w}"] = _window_count(jg * B + f.astype(np.int64), qk, w) - self_in_window(f, w)
+        out[f"G_judge_closed_last{w}"] = _window_count(jg * B + e.astype(np.int64), qk, w) - self_in_window(e, w)
         out[f"G_judge_net_flow{w}"] = out[f"G_judge_filed_last{w}"] - out[f"G_judge_closed_last{w}"]
     out["G_judge_share_of_court"] = out["G_judge_open"] / np.maximum(out["open_cases"], 1)
     mg = A["mag_codes"].astype(np.int64)

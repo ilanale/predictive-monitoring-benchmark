@@ -132,7 +132,7 @@ def write_report(report, spec, path):
         L.append(f"| {v} | {len(cols)} | {shown} |")
     L += ["", f"- Rare levels mapped to \"other\" (< 10 occurrences; static = segments, dynamic = rows; `Activity` untouched): {json.dumps(r['rare_levels_to_other'])}",
           "- Global features: \"open at t\" = filing ≤ t < termination (state at end of day t), phase j at t = entry_j ≤ t < exit_j, "
-          "this case excluded by subtracting its own indicator; windows = (t − w, t]; judge = case-table `District_Judge` "
+          "this case excluded by subtracting its own indicator (also in the filed/closed windows and net flow); windows = (t − w, t]; judge = case-table `District_Judge` "
           "(judge features 0 when missing); judge median case length over that judge's cases closed strictly before t (0 if none). "
           "Computed from all cases after D3 (not only the window).", ""]
     L += ["## Judgment calls (not fixed by D1–D12 / SCHEMA; conservative option chosen)", "",
@@ -147,7 +147,14 @@ def write_report(report, spec, path):
           "9. `PP_prev_phase_days_1/2` exist in all three files (0 where not applicable) so that one `court_columns.json` serves every phase; D2 cases have `PP_prev_phase_days_2 = 0`.",
           "10. `PP_events_last30/90` and all cumulative counters use only events at positions ≤ i in the (date, row) order, so later events of the same day are not counted.",
           "11. Missing static categoricals → \"missing\"; missing numeric meta → 0 (none of the exported numeric meta columns has missing values).",
-          "12. Segments without an in-phase event strictly before the exit (D7) are dropped; in phase 1 all 875 are positives (answer filed before/at the first docketed event), a small selection effect noted for the thesis.", ""]
+          f"12. D2 cases (trial with no answer): phase 1 ends at `phase3_entry_date` (raw `phase1_exit_date` is the termination date); changed for {pf['D2_phase1_exit_changed_window']} windowed cases ({pf['D2_phase1_exit_changed']} in all). Applied to segment exit, trace cut, `remaining_in_phase`, `PP_prev_phase_days_1` and the global phase-1 intervals (G2 audit fix).",
+          "13. `filed_last30/90`, `closed_last30/90` and `net_flow30/90` (court and judge) exclude the case itself, like every other global count (RD-06; G2 audit fix).",
+          "14. `PP_n_distinct_judges` counts every judge ID listed on an event (events can list up to 5 judges), not only the first judge used for the `judge` column.",
+          "15. Segments without an in-phase event strictly before the exit (D7) are dropped; in phase 1 all 875 are positives (answer filed before/at the first docketed event), a small selection effect noted for the thesis.", ""]
+    L += ["## Limitations", "",
+          "- The global features use only the closed cases in the case table (155,525, minus 50 D3 cases). The 7,161 cases of the full log that were still open at extraction are missing, so open counts (and filed counts) are biased low, increasingly toward 2016.",
+          "- The case-table `District_Judge` (used for the judge-level G features and `M_District_Judge`) may be the judge at the end of the case (after reassignment), not the judge at time t.",
+          "- 875 phase-1 segments (all positives) have no in-phase event before the exit and are dropped (D7).", ""]
     L += ["## Excluded columns and why", "", "| Column(s) | Reason |", "|---|---|"]
     for c, why in spec["excluded"].items():
         L.append(f"| `{c}` | {why} |")

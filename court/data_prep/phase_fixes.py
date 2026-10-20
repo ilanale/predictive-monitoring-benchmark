@@ -5,6 +5,9 @@ All rules work on the case table only. Every count is written into `report`.
       -> phase2_entered := False (closed in phase 1 by a court decision; T1 label 0; no phase-2 segment).
 * D2: phase2_entered & no phase2_entry_date & phase3_entered (trial with no answer)
       -> moved on (T1 label 1); phase 2 has zero length (no phase-2 segment); phase-3 segment kept.
+      Phase 1 ends when phase 3 starts: phase1_exit_date := phase3_entry_date (the raw value is
+      the termination date). This feeds the segment exit, the trace cut, remaining_in_phase,
+      PP_prev_phase_days_1 and the global phase-1 intervals.
 * D3: phase2_exit_date < phase2_entry_date -> drop the whole case.
 * D4: phase1_completed & ~phase2_entered (answered on the termination day) -> follow the phase
       table: phase2_entered stays False (T1 label 0). Counted only.
@@ -52,6 +55,9 @@ def apply_fixes(c, report=None, window=WINDOW, log=print):
     c["fix_D1"] = f.D1.values
     # D2: moved on, zero-length phase 2 (no phase-2 segment because entry date is missing)
     c["fix_D2"] = f.D2.values
+    rep["D2_phase1_exit_changed"] = int((f.D2 & (c.phase1_exit_date != c.phase3_entry_date)).sum())
+    rep["D2_phase1_exit_changed_window"] = int((f.D2 & in_win & (c.phase1_exit_date != c.phase3_entry_date)).sum())
+    c.loc[f.D2, "phase1_exit_date"] = c.loc[f.D2, "phase3_entry_date"]
     c["fix_D4"] = f.D4.values
     c.loc[f.D4, ["phase2_entry_date", "phase2_exit_date"]] = pd.NaT  # D4: no phase 2 (follow the phase table)
     # T1 label after fixes: moved on = phase2_entered (D2 stays True, D1 now False, D4 False)
