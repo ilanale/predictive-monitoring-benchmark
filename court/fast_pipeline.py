@@ -270,7 +270,7 @@ class FastEncoder:
         return np.nan_to_num(out, nan=0.0)
 
     def _codes(self, s, c):
-        codes = pd.Categorical(s.astype(str), categories=self.vocab[c]).codes.astype(np.int64)
+        codes = pd.Index(self.vocab[c]).get_indexer(s.astype(str)).astype(np.int64)
         codes[s.isna().to_numpy()] = -1
         return codes
 

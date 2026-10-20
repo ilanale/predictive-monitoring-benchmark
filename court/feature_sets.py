@@ -64,6 +64,16 @@ def _view_cols(cols_json, view):
     return cols
 
 
+def is_forbidden(col, forbidden):
+    """Exact name or glob pattern (``is_case_*``) from never_features / excluded."""
+    import fnmatch
+    return any(col == f or (any(ch in f for ch in "*?[") and fnmatch.fnmatchcase(col, f)) for f in forbidden)
+
+
+def forbidden_set(cols_json):
+    return set(HARD_NEVER) | set(cols_json.get("never_features", [])) | set(cols_json.get("excluded", {}))
+
+
 def get_spec(fs, cols_json, available=None):
     """Build the FeatureSpec of feature set ``fs``.
 
@@ -72,12 +82,12 @@ def get_spec(fs, cols_json, available=None):
     small fixtures work.
     """
     views = views_of(fs)
-    forbidden = set(HARD_NEVER) | set(cols_json.get("never_features", [])) | set(cols_json.get("excluded", {}))
+    forbidden = forbidden_set(cols_json)
     col_view = {}
     for v in views:
         for c in _view_cols(cols_json, v):
             col_view.setdefault(c, v)
-    bad = sorted(set(col_view) & forbidden)
+    bad = sorted(c for c in col_view if is_forbidden(c, forbidden))
     if bad:
         raise ValueError("never-feature/excluded columns in %s: %s" % (fs, bad))
     if available is not None:

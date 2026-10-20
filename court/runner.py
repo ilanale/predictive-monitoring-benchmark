@@ -124,10 +124,13 @@ def fit_predict_buckets(tr, te, method, learner, task_type, params, n_jobs, fall
             p = params["per_bucket"].get(str(int(b)), params["best"])
         elif isinstance(params, dict) and "best" in params:
             p = params["best"]
-        trb = tr.subset_rows(tr_idx)
+        # avoid copies of the (large) matrices when the bucket is the whole set (single_agg)
+        trb = tr if len(tr_idx) == len(tr.meta) else tr.subset_rows(tr_idx)
         mask = fit_columns(trb)
-        trb = trb.subset_cols(mask)
-        Xte = te.X[te_idx][:, mask]
+        Xte = te.X if len(te_idx) == len(te.meta) else te.X[te_idx]
+        if not mask.all():
+            trb = trb.subset_cols(mask)
+            Xte = Xte[:, mask]
         model = make_learner(learner, task_type, p, n_jobs)
         model.fit(trb.X, yb)
         if task_type == "classification":
@@ -191,6 +194,10 @@ def run_job(job_id, cfg, data_dir, results_dir, sample_frac=None, train_frac=Non
         df = df[df["segment_id"].isin(keep)]
         flags = (flags + ";" if flags else "") + "train_frac=%s" % train_frac
     tr, te, split_ts, train_events = build_matrices(df, task_type, spec, L, gap_train)
+    del df
+    keep = fit_columns(tr)  # upstream: dummy columns exist only for values seen in train
+    if not keep.all():
+        tr, te = tr.subset_cols(keep), te.subset_cols(keep)
     params, params_source = load_params(results_dir, task, method, learner)
     if params_source == "default":
         flags = (flags + ";" if flags else "") + "default_params"

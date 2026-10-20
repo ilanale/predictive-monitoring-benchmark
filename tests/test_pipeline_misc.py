@@ -115,11 +115,13 @@ class TestRunnerAndQueue(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp(prefix="court_test_")
         cls.data = write_fixture(os.path.join(cls.tmp, "data"), n_cases=80)
-        cls.cfg = yaml.safe_load(open(os.path.join(os.path.dirname(__file__), "..", "configs", "experiments.yaml")))
+        with open(os.path.join(os.path.dirname(__file__), "..", "configs", "experiments.yaml")) as f:
+            cls.cfg = yaml.safe_load(f)
         cls.cfg["budget"]["xgb_n_jobs"] = 2
         cls.cfg["budget"]["tuning"]["n_iter"] = 2
         cls.cfg_path = os.path.join(cls.tmp, "cfg.yaml")
-        yaml.safe_dump(cls.cfg, open(cls.cfg_path, "w"))
+        with open(cls.cfg_path, "w") as f:
+            yaml.safe_dump(cls.cfg, f)
 
     @classmethod
     def tearDownClass(cls):

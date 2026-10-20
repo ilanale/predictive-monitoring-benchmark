@@ -42,6 +42,22 @@ class TestFastEqualsUpstream(unittest.TestCase):
                 with self.subTest(fs=fs, gap=gap):
                     self.check(df, fs, 8, gap)
 
+    def test_identical_xgboost_predictions(self):
+        """Same params -> identical predictions from the fast matrix and the upstream-style matrix."""
+        import xgboost as xgb
+        df = load(80, 1, 3)
+        spec = get_spec("FS-ALL", columns_json(), df.columns)
+        pm = fast(df, spec, 10, 3)
+        R, _, _ = ref.encode(ref.generate_prefix_data(df, 10, 3), spec)
+        y_ref = (ref.generate_prefix_data(df, 10, 3).groupby("segment_id")["label"].first() == "deviant").astype(int)
+        np.testing.assert_array_equal(y_ref.to_numpy(), pm.meta["y_clf"].to_numpy())
+        kw = dict(n_estimators=50, learning_rate=0.3, subsample=0.7, max_depth=5, colsample_bytree=0.6,
+                  min_child_weight=1, random_state=22, n_jobs=2)
+        p1 = xgb.XGBClassifier(**kw).fit(pm.X, pm.meta["y_clf"]).predict_proba(pm.X)[:, 1]
+        p2 = xgb.XGBClassifier(**kw).fit(R.to_numpy(np.float32), y_ref.to_numpy()).predict_proba(
+            R.to_numpy(np.float32))[:, 1]
+        np.testing.assert_array_equal(p1, p2)
+
     def test_col_major_layout_and_small_chunks(self):
         df = load(40, 2, 1)
         self.check(df, "FS-ALL", 40, 1, layout="col_major", max_chunk_cells=50)
