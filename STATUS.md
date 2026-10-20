@@ -7,7 +7,7 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 | Gate | Due (IDT) | State |
 |---|---|---|
 | Bootstrap | 02:19 | ✅ 02:16 |
-| G1 port | 03:19 | |
+| G1 port | 03:19 | ✅ 02:19 |
 | G2 data | 04:04 | data built 02:17; A4 audit running |
 | G3 pipeline | 05:19 | |
 | G4 review → Tier 1a | 05:34 | |
@@ -22,3 +22,4 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 - 02:16 · orchestrator · Bootstrap done: commits fe65c1a..ac4ddf7, worktrees ws-port/ws-data/ws-pipeline, caffeinate running. Launching A1 (port) and A2 (data).
 - 02:20 · orchestrator · A1 port and A2 data launched; A3 pipeline starts early on court/-only modules (RD-05).
 - 02:17 · A2 · WS1 done (ws-data merged, 4bcfc70): 127,610 / 60,412 / 2,484 segments; 14 tests OK; build 31 s. Judgment calls → RD-06..RD-14. Launching A4 data audit (G2).
+- 02:19 · A1 · G1 passed: compat 2212f02 + baseline 1a55115 merged (76a441d); 17 tests OK; synthetic smoke AUC single_agg 0.898 / prefix_agg 0.828. Pushing court-adaptation.
