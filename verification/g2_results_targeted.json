@@ -34,17 +34,17 @@
  "check1_full_population": {
   "label": 0,
   "entry_date": 0,
-  "exit_date": 80,
-  "n_events": 80,
-  "last_event_date": 80,
+  "exit_date": 0,
+  "n_events": 0,
+  "last_event_date": 0,
   "n_hist": 0,
   "only_in_mine": 0,
   "only_in_output": 0,
-  "segments_any_mismatch": 80,
+  "segments_any_mismatch": 0,
   "mismatch_by_phase_and_flag": {
    "p1": {
-    "total": 80,
-    "D2": 80,
+    "total": 0,
+    "D2": 0,
     "D1": 0,
     "D4": 0
    },
@@ -61,92 +61,7 @@
     "D4": 0
    }
   },
-  "examples": [
-   {
-    "segment_id": "ilnd;;1:03-cv-05407|p1",
-    "label_mine": 1,
-    "label_out": 1,
-    "exit_mine": "2005-09-21",
-    "exit_out": "2006-09-05",
-    "n_mine": 48,
-    "n_out": 71,
-    "last_mine": "2005-09-14",
-    "last_out": "2006-09-01",
-    "D1": false,
-    "D2": true,
-    "D4": false
-   },
-   {
-    "segment_id": "ilnd;;1:03-cv-08825|p1",
-    "label_mine": 1,
-    "label_out": 1,
-    "exit_mine": "2005-04-05",
-    "exit_out": "2006-09-11",
-    "n_mine": 15,
-    "n_out": 21,
-    "last_mine": "2005-04-04",
-    "last_out": "2005-04-07",
-    "D1": false,
-    "D2": true,
-    "D4": false
-   },
-   {
-    "segment_id": "ilnd;;1:04-cr-00038|p1",
-    "label_mine": 1,
-    "label_out": 1,
-    "exit_mine": "2005-02-07",
-    "exit_out": "2010-03-01",
-    "n_mine": 55,
-    "n_out": 173,
-    "last_mine": "2005-02-04",
-    "last_out": "2009-04-23",
-    "D1": false,
-    "D2": true,
-    "D4": false
-   },
-   {
-    "segment_id": "ilnd;;1:04-cr-00653|p1",
-    "label_mine": 1,
-    "label_out": 1,
-    "exit_mine": "2005-05-04",
-    "exit_out": "2005-08-26",
-    "n_mine": 22,
-    "n_out": 43,
-    "last_mine": "2005-05-03",
-    "last_out": "2005-08-16",
-    "D1": false,
-    "D2": true,
-    "D4": false
-   },
-   {
-    "segment_id": "ilnd;;1:04-cv-02282|p1",
-    "label_mine": 1,
-    "label_out": 1,
-    "exit_mine": "2007-07-13",
-    "exit_out": "2007-10-03",
-    "n_mine": 50,
-    "n_out": 56,
-    "last_mine": "2007-06-21",
-    "last_out": "2007-10-02",
-    "D1": false,
-    "D2": true,
-    "D4": false
-   },
-   {
-    "segment_id": "ilnd;;1:04-cv-03163|p1",
-    "label_mine": 1,
-    "label_out": 1,
-    "exit_mine": "2006-03-06",
-    "exit_out": "2010-11-22",
-    "n_mine": 44,
-    "n_out": 99,
-    "last_mine": "2006-03-02",
-    "last_out": "2008-03-13",
-    "D1": false,
-    "D2": true,
-    "D4": false
-   }
-  ],
+  "examples": [],
   "only_in_mine_examples": [],
   "only_in_output_examples": []
  },
@@ -166,170 +81,13 @@
    "D2": 50,
    "D4": 7
   },
-  "mismatching_segments": 17,
-  "mismatch_fields": {
-   "exit_date": 17,
-   "n_events": 17,
-   "last_event_date": 17
-  },
-  "examples": [
-   {
-    "segment_id": "ilnd;;1:16-cv-02537|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2018-03-07",
-    "n_out": 71,
-    "label_mine": 1,
-    "exit_mine": "2017-04-14",
-    "n_mine": 46,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   },
-   {
-    "segment_id": "ilnd;;1:10-cv-04262|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2012-07-27",
-    "n_out": 82,
-    "label_mine": 1,
-    "exit_mine": "2012-04-26",
-    "n_mine": 70,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   },
-   {
-    "segment_id": "ilnd;;1:05-cr-00969|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2007-03-26",
-    "n_out": 41,
-    "label_mine": 1,
-    "exit_mine": "2006-01-26",
-    "n_mine": 26,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   },
-   {
-    "segment_id": "ilnd;;1:13-cv-01857|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2014-04-17",
-    "n_out": 55,
-    "label_mine": 1,
-    "exit_mine": "2014-01-15",
-    "n_mine": 33,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   },
-   {
-    "segment_id": "ilnd;;1:06-cv-01775|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2012-03-30",
-    "n_out": 144,
-    "label_mine": 1,
-    "exit_mine": "2008-11-17",
-    "n_mine": 36,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   },
-   {
-    "segment_id": "ilnd;;1:05-cr-00662|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2007-07-24",
-    "n_out": 94,
-    "label_mine": 1,
-    "exit_mine": "2006-11-06",
-    "n_mine": 61,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   },
-   {
-    "segment_id": "ilnd;;1:03-cv-05407|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2006-09-05",
-    "n_out": 71,
-    "label_mine": 1,
-    "exit_mine": "2005-09-21",
-    "n_mine": 48,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   },
-   {
-    "segment_id": "ilnd;;1:10-cv-05070|p1",
-    "phase": 1,
-    "D1": false,
-    "D2": true,
-    "D4": false,
-    "kept_mine": true,
-    "in_output": true,
-    "exit_out": "2018-06-11",
-    "n_out": 163,
-    "label_mine": 1,
-    "exit_mine": "2012-04-03",
-    "n_mine": 20,
-    "problems": [
-     "exit_date",
-     "n_events",
-     "last_event_date"
-    ]
-   }
-  ]
+  "mismatching_segments": 0,
+  "mismatch_fields": {},
+  "examples": []
  },
  "check3": {
   "p1": {
-   "rows": 1501052,
+   "rows": 1498497,
    "ts_ge_exit": 0,
    "remaining_ne_exit_minus_ts": 0,
    "in_phase_ne_ts_ge_entry": 0,
@@ -408,248 +166,20 @@
   "n_P_PP": 100,
   "distinct_columns_covered": 14,
   "by_phase": {
-   "1": 113,
-   "2": 129,
-   "3": 58
+   "1": 128,
+   "2": 102,
+   "3": 70
   },
-  "mismatches": 54,
-  "mismatch_by_col": {
-   "G_court_open_phase1": 17,
-   "G_judge_open_phase1": 7,
-   "G_court_filed_last90": 7,
-   "G_judge_filed_last90": 7,
-   "G_court_net_flow90": 4,
-   "G_judge_filed_last30": 3,
-   "G_judge_net_flow90": 2,
-   "G_court_filed_last30": 2,
-   "G_judge_net_flow30": 2,
-   "G_court_net_flow30": 1,
-   "G_judge_open_same_phase": 1,
-   "PP_n_distinct_judges": 1
-  },
-  "mismatch_by_explanation": {
-   "filed_count_includes_self": 28,
-   "D2_raw_phase1_exit": 25,
-   "distinct_judges_counts_all_listed_judges": 1
-  },
+  "mismatches": 0,
+  "mismatch_by_col": {},
+  "mismatch_by_explanation": {},
   "timestamp_misaligned": 0,
   "judge_other_cells_checked": 0,
-  "examples": [
-   {
-    "phase": 1,
-    "row": 352005,
-    "segment_id": "ilnd;;1:07-cv-01075|p1",
-    "pos": 6,
-    "timestamp": "2007-03-16",
-    "col": "G_judge_net_flow90",
-    "group": "G",
-    "expected": -16,
-    "got": -15,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 1,
-    "row": 814555,
-    "segment_id": "ilnd;;1:11-cv-06978|p1",
-    "pos": 17,
-    "timestamp": "2012-06-06",
-    "col": "G_judge_open_phase1",
-    "group": "G",
-    "expected": 128,
-    "got": 129,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "D2_raw_phase1_exit"
-   },
-   {
-    "phase": 1,
-    "row": 597129,
-    "segment_id": "ilnd;;1:09-cv-06281|p1",
-    "pos": 1,
-    "timestamp": "2009-10-07",
-    "col": "G_court_net_flow30",
-    "group": "G",
-    "expected": 77,
-    "got": 78,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 1,
-    "row": 1314337,
-    "segment_id": "ilnd;;1:15-cv-11790|p1",
-    "pos": 5,
-    "timestamp": "2016-01-26",
-    "col": "G_court_filed_last90",
-    "group": "G",
-    "expected": 2786,
-    "got": 2787,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 1,
-    "row": 104495,
-    "segment_id": "ilnd;;1:04-cv-01217|p1",
-    "pos": 2,
-    "timestamp": "2004-05-04",
-    "col": "G_court_net_flow90",
-    "group": "G",
-    "expected": 128,
-    "got": 129,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 3,
-    "row": 108169,
-    "segment_id": "ilnd;;1:07-cr-00605|p3",
-    "pos": 25,
-    "timestamp": "2008-05-13",
-    "col": "G_court_open_phase1",
-    "group": "G",
-    "expected": 4296,
-    "got": 4299,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "D2_raw_phase1_exit"
-   },
-   {
-    "phase": 1,
-    "row": 1062311,
-    "segment_id": "ilnd;;1:13-cv-07260|p1",
-    "pos": 0,
-    "timestamp": "2013-10-21",
-    "col": "G_judge_open_same_phase",
-    "group": "G",
-    "expected": 149,
-    "got": 150,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "D2_raw_phase1_exit"
-   },
-   {
-    "phase": 1,
-    "row": 1373388,
-    "segment_id": "ilnd;;1:16-cv-05540|p1",
-    "pos": 43,
-    "timestamp": "2017-08-16",
-    "col": "G_court_open_phase1",
-    "group": "G",
-    "expected": 5631,
-    "got": 5645,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "D2_raw_phase1_exit"
-   },
-   {
-    "phase": 1,
-    "row": 452487,
-    "segment_id": "ilnd;;1:08-cv-01738|p1",
-    "pos": 1,
-    "timestamp": "2008-03-26",
-    "col": "G_court_net_flow90",
-    "group": "G",
-    "expected": 93,
-    "got": 94,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 2,
-    "row": 1737298,
-    "segment_id": "ilnd;;1:12-cv-10392|p2",
-    "pos": 4,
-    "timestamp": "2013-01-08",
-    "col": "G_court_open_phase1",
-    "group": "G",
-    "expected": 6639,
-    "got": 6652,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "D2_raw_phase1_exit"
-   },
-   {
-    "phase": 1,
-    "row": 493462,
-    "segment_id": "ilnd;;1:08-cv-05393|p1",
-    "pos": 6,
-    "timestamp": "2008-11-14",
-    "col": "G_judge_filed_last90",
-    "group": "G",
-    "expected": 71,
-    "got": 72,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 2,
-    "row": 2049860,
-    "segment_id": "ilnd;;1:14-cv-08261|p2",
-    "pos": 3,
-    "timestamp": "2014-10-28",
-    "col": "G_judge_filed_last30",
-    "group": "G",
-    "expected": 24,
-    "got": 25,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 1,
-    "row": 510129,
-    "segment_id": "ilnd;;1:08-cv-06952|p1",
-    "pos": 0,
-    "timestamp": "2008-12-04",
-    "col": "G_court_filed_last30",
-    "group": "G",
-    "expected": 662,
-    "got": 663,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   },
-   {
-    "phase": 1,
-    "row": 1262578,
-    "segment_id": "ilnd;;1:15-cv-05062|p1",
-    "pos": 1,
-    "timestamp": "2015-06-30",
-    "col": "G_judge_open_phase1",
-    "group": "G",
-    "expected": 163,
-    "got": 164,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "D2_raw_phase1_exit"
-   },
-   {
-    "phase": 2,
-    "row": 523787,
-    "segment_id": "ilnd;;1:06-cv-01146|p2",
-    "pos": 2,
-    "timestamp": "2006-03-02",
-    "col": "G_court_filed_last30",
-    "group": "G",
-    "expected": 585,
-    "got": 586,
-    "ok": false,
-    "ts_ok": true,
-    "explained_by": "filed_count_includes_self"
-   }
-  ]
+  "examples": []
  },
  "extra_full_population": {
   "p1": {
-   "rows": 1501052,
+   "rows": 1498497,
    "open_cases_mismatch": 0,
    "prev_days_nonzero": 0
   },
@@ -666,11 +196,11 @@
   "p3": {
    "rows": 331873,
    "open_cases_mismatch": 0,
-   "prev_days_1_mismatch": 6077,
-   "prev_days_1_mismatch_D2_rows": 6077,
-   "prev_days_1_eq_raw_D2": 6077,
+   "prev_days_1_mismatch": 0,
+   "prev_days_1_mismatch_D2_rows": 0,
+   "prev_days_1_eq_raw_D2": 0,
    "D2_rows": 6077,
-   "D2_rows_remaining_recoverable_from_features": 6077,
+   "D2_rows_remaining_recoverable_from_features": 0,
    "prev_days_2_mismatch": 0
   }
  }

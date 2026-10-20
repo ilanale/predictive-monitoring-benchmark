@@ -22,7 +22,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.join(ROOT, "data", "raw")
 PROC = os.path.join(ROOT, "data", "processed")
 WIN = ("2003-01-01", "2016-12-31")
-SEED = 7
+SEED = 7                                     # Check-1 sample seed
+FSEED = int(os.environ.get("G2_FSEED", "7"))  # feature-cell seed (re-audit: 2026)
 T0 = time.time()
 RES = {}
 
@@ -307,6 +308,8 @@ def main():
 
     # ------------------------------------------------ extra full-population checks
     extra_full(c, outs)
+    if not os.environ.get("G2_TARGETED"):
+        extra_reaudit(c, L, outs, cols)
     tag = "_targeted" if os.environ.get("G2_TARGETED") else ""
     with open(os.path.join(ROOT, "verification", f"g2_results{tag}.json"), "w") as fh:
         json.dump(RES, fh, indent=1, default=str)
@@ -351,6 +354,105 @@ def extra_full(c, outs):
     log("EXTRA", r)
 
 
+def extra_reaudit(c, L, outs, cols):
+    """Re-audit extras: CSV/parquet twins (p1, p2), rare-level 'other' mapping, M values vs case table."""
+    import hashlib
+    r = {}
+    rng = np.random.default_rng(FSEED + 2)
+    # --- twins: row count + 1% sample (every 100th row) compared column by column, plus a hash
+    tw = {}
+    for k in (1, 2):
+        pt = pq.read_table(os.path.join(PROC, f"court_phase{k}.parquet"))
+        n_pq = pt.num_rows
+        keep, parts, off = [], [], 0
+        for ch in pd.read_csv(os.path.join(PROC, f"court_phase{k}.csv"), sep=";", chunksize=250_000, low_memory=False):
+            idx = np.arange(off, off + len(ch))
+            parts.append(ch[idx % 100 == 0])
+            off += len(ch)
+        a = pd.concat(parts)
+        b = pt.take(np.arange(0, n_pq, 100)).to_pandas()
+        diff = []
+        for col in b.columns:
+            x, y = a[col].reset_index(drop=True), b[col].reset_index(drop=True)
+            if (x.astype(str).values == y.astype(str).values).all():
+                continue
+            xn, yn = pd.to_numeric(x, errors="coerce"), pd.to_numeric(y, errors="coerce")
+            if xn.notna().all() and ((xn - yn).abs() <= 1e-9).all():
+                continue
+            diff.append(col)
+        hs = lambda d: hashlib.md5(pd.util.hash_pandas_object(d.astype(str), index=False).values.tobytes()).hexdigest()
+        tw[f"p{k}"] = {"rows_csv": off, "rows_parquet": n_pq, "same_columns": list(a.columns) == list(b.columns),
+                       "sample_rows": int(len(b)), "differing_columns": diff,
+                       "hash_csv_sample": hs(a.reset_index(drop=True)), "hash_parquet_sample": hs(b)}
+    r["twins"] = tw
+    log("TWINS", tw)
+    # --- rare-level mapping + M values, full population per phase file
+    ci = c.set_index("ucid")
+    mcat = [x for x in cols["views"]["M"] if x in cols["static_cat"]]
+    mnum = [x for x in cols["views"]["M"] + cols["views"]["S"] if x in cols["static_num"]]
+    rare, mvals, msample = {}, {}, []
+    for k, o in outs.items():
+        # judge: rebuild every row of the file from the raw log, aligned on (segment, position)
+        seg = o.drop_duplicates("segment_id")[["segment_id", "ucid", "exit_date"]]
+        ev = L[["ucid", "date", "rowno", "event_judge", "Activity"]].merge(seg, on="ucid")
+        ev = ev[ev.date < pd.to_datetime(ev.exit_date)].sort_values(["segment_id", "date", "rowno"])
+        ev["pos"] = ev.groupby("segment_id").cumcount()
+        oj = pd.read_parquet(os.path.join(PROC, f"court_phase{k}.parquet"), columns=["segment_id", "judge"])
+        oj["pos"] = o.pos.values
+        m = oj.merge(ev, on=["segment_id", "pos"], how="left")
+        raw = m.event_judge.str.extract(r"\('([^']*)'", expand=False).fillna("missing")
+        cnt = raw.value_counts()
+        exp = raw.where(raw.map(cnt) >= 10, "other")
+        rr = {"rows": int(len(m)), "unaligned_rows": int(m.event_judge.isna().sum()),
+              "activity_mismatch": int((m.Activity_x != m.Activity_y).sum()) if "Activity_x" in m else None,
+              "judge_mismatch": int((exp.values != m.judge.values).sum()),
+              "judge_levels_mapped_to_other": int((cnt < 10).sum()), "judge_rows_other": int((exp == "other").sum())}
+        # static M categoricals: counted per segment
+        st = pd.read_parquet(os.path.join(PROC, f"court_phase{k}.parquet"), columns=["segment_id", "ucid"] + mcat + mnum)
+        st = st.drop_duplicates("segment_id")
+        nvary = pd.read_parquet(os.path.join(PROC, f"court_phase{k}.parquet"), columns=["segment_id"] + mcat + mnum) \
+            .groupby("segment_id").nunique().gt(1).sum().sum()
+        rr["M_values_varying_within_segment"] = int(nvary)
+        cs = ci.reindex(st.ucid)
+        for col in mcat:
+            rv = cs[col[2:]].fillna("missing").astype(str).values
+            vc = pd.Series(rv).value_counts()
+            e = np.where(pd.Series(rv).map(vc).values >= 10, rv, "other")
+            rr[f"{col}_mismatch"] = int((e != st[col].astype(str).values).sum())
+            rr[f"{col}_levels_other"] = int((vc < 10).sum())
+            mvals.setdefault(col, 0)
+            mvals[col] += int((e != st[col].astype(str).values).sum())
+        for col in mnum:
+            src = col[2:]
+            rv = cs[src].map({True: 1.0, False: 0.0, "TRUE": 1.0, "FALSE": 0.0}).fillna(cs[src]) if cs[src].dtype == bool or cs[src].dtype == object else cs[src]
+            rv = pd.to_numeric(rv, errors="coerce").fillna(0).values
+            mm = int((np.abs(rv - st[col].values.astype(float)) > 1e-9).sum())
+            mvals.setdefault(col, 0)
+            mvals[col] += mm
+        # 200 random M cells (about 67 per phase), checked one by one against the raw case row
+        for _ in range({1: 67, 2: 67, 3: 66}[k]):
+            i = int(rng.integers(len(st))); col = str(rng.choice(mcat + [x for x in mnum if x.startswith("M_")]))
+            raw_v = ci.loc[st.ucid.iloc[i], col[2:]]
+            got = st[col].iloc[i]
+            if col in mcat:
+                exp_v = "missing" if pd.isna(raw_v) else str(raw_v)
+                ok = got == exp_v or (got == "other" and rr[f"{col}_levels_other"] > 0)
+            else:
+                exp_v = 0.0 if pd.isna(raw_v) else float(raw_v)
+                ok = abs(exp_v - float(got)) <= 1e-9
+            msample.append({"phase": k, "segment_id": st.segment_id.iloc[i], "col": col, "raw": str(raw_v),
+                            "got": str(got), "ok": bool(ok)})
+        rare[f"p{k}"] = rr
+        log("RARE/M", k, rr)
+    r["rare_level_and_alignment"] = rare
+    r["M_S_full_population_mismatches"] = mvals
+    ms = pd.DataFrame(msample)
+    r["M_sample_200"] = {"n": int(len(ms)), "mismatches": int((~ms.ok).sum()),
+                         "other_cells": int((ms.got == "other").sum()), "examples_bad": ms[~ms.ok].head(5).to_dict("records")}
+    RES["reaudit_extras"] = r
+    log("M sample", r["M_sample_200"])
+
+
 # ====================================================================== features
 def build_trace(c_row, L_by, k):
     ext = c_row[f"x{k}"]
@@ -358,7 +460,7 @@ def build_trace(c_row, L_by, k):
     return ev[ev.date < ext].reset_index()
 
 
-def p_value(col, tr, i, c_row, k, all_judges=False):
+def p_value(col, tr, i, c_row, k, all_judges=True):
     """Brute-force P/PP feature at trace position i."""
     row = tr.iloc[i]
     t = row.date
@@ -483,8 +585,10 @@ def feature_check(c, L, outs, cols, rng):
     gcols = cols["views"]["G"] + cols["views"]["B0G"]
     pcols = cols["views"]["P"] + cols["views"]["PP"]
     plan = [("G", 180), ("P", 320)]
+    if os.environ.get("G2_FSEED"):
+        rng = np.random.default_rng(FSEED)
     if os.environ.get("G2_TARGETED"):                            # supplementary targeted sample
-        rng = np.random.default_rng(SEED + 1)
+        rng = np.random.default_rng(FSEED + 1)
         gcols = [x for x in gcols if re.search(r"filed|net_flow|phase1|same_phase", x)]
         pcols = ["PP_n_distinct_judges", "PP_prev_phase_days_1", "PP_prev_phase_days_2"]
         plan = [("G", 200), ("P", 100)]
@@ -534,7 +638,7 @@ def feature_check(c, L, outs, cols, rng):
             if col == "PP_prev_phase_days_1" and cr.D2:
                 alt.append(("D2_raw_phase1_exit", (cr.x1_raw - cr.e1).days))
             if col == "PP_n_distinct_judges":
-                alt.append(("distinct_judges_counts_all_listed_judges", p_value(col, tr, pos, cr, k, all_judges=True)))
+                alt.append(("distinct_judges_counts_first_judge_only", p_value(col, tr, pos, cr, k, all_judges=False)))
             if pd.Timestamp(cr.x1_raw) != pd.Timestamp(cr.x1) and k == 1:
                 alt.append(("D2_raw_phase1_exit_trace", "trace differs"))
             for name, v in alt:

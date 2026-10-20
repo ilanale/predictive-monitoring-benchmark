@@ -1,10 +1,50 @@
 # VERIFICATION
 
-## G2 — data audit
+## G2 — re-audit
 
-**Auditor:** A4 Verifier, 2026-10-21. **Verdict: FAIL** (one blocking defect, the D2 phase-1 exit date; it also causes leakage).
+**Auditor:** A4 Verifier, 2026-10-21. **Verdict: PASS.**
 
-**Method.** I re-derived everything from `data/raw/*` with my own code (`verification/g2_data_audit.py`) and never opened `court/data_prep/`, `court/court_confs.py` or `tests/test_data_prep.py`. Specs used: PLAN §0.3/§1/§2/§6, DECISIONS D1–D12, `court/SCHEMA.md`, RUN_DECISIONS RD-06..RD-14. The script writes the evidence files `verification/g2_results.json`, `g2_results_targeted.json`, `g2_feature_cells.csv` and `g2_feature_cells_targeted.csv`. Run it with `G2_CACHE=<dir> python verification/g2_data_audit.py`; it takes about 15 s once the event-log subset is cached. Adding `G2_TARGETED=1` runs the supplementary sample instead.
+**What was audited.** The rebuilt `data/processed/` from fix commit 335f8aa, merged into `court-adaptation`. Files are dated 02:27; phase 1 now has 1,498,497 rows.
+
+**Method.**
+- Same independence rules as the first pass. I did not open the builder's code; everything is re-derived from `data/raw/*` with `verification/g2_data_audit.py`.
+- Command: `G2_FSEED=2026 G2_CACHE=<dir> python verification/g2_data_audit.py`, then the same with `G2_TARGETED=1`.
+- Evidence files: `verification/g2_results.json`, `g2_results_targeted.json`, `g2_feature_cells.csv` and `g2_feature_cells_targeted.csv`. These files now hold the re-audit results.
+
+**What changed in my reference definitions.**
+- `filed_last*` and `closed_last*` exclude the case itself. This is my original reading (RD-06), which the builder has now adopted.
+- `PP_n_distinct_judges` counts every judge ID listed on an event. This follows data_report item 14, which now documents it; first-judge-only is kept only as a diagnostic.
+- Nothing else changed.
+
+| Check | Sample | Mismatches |
+|---|---|---|
+| **1 Labels/dates/traces**, all segments | 190,506 segments (127,610 / 60,412 / 2,484); label, entry, exit, n_events, last event date, n_hist, segment set | **0** (0 missing, 0 extra) |
+| **1 Labels/dates/traces**, stratified sample (seed 7; 68 D1/D2/D4: D1 11, D2 50, D4 7) | 200 segments, including the full (date, Activity) sequence | **0** |
+| **2 Features**, fresh sample (seed 2026) | 500 cells: 180 G_/open_cases, 320 P/PP; 107 columns; phases 182/207/111 | **0** |
+| **2 Features**, targeted sample (seed 2027) | 300 cells: 200 filed/closed/net_flow, phase-1 and same_phase columns; 100 distinct-judges and prev-phase-days cells | **0** |
+| **2 Full population** | every row: `open_cases`, `PP_prev_phase_days_1/2` | **0** |
+| **3 Leakage scan**, every row of p1/p2/p3 | timestamp ≥ exit; `remaining ≠ exit − ts`; `in_phase`; `n_hist`; sort order; `event_nr`; empty segments; 2003–2016 window; `filing_year`; D3 present; segment_id | **0** on every item |
+| **3 D2 identity** | phase-3 D2 rows where `remaining_in_phase == PP_prev_phase_days_1 − timesincecasestart` | **0 of 6,077** (was 6,077 of 6,077) |
+| **3 D2 traces** | D2 phase-1 exit = phase-3 entry for all 83 windowed D2 cases | covered by the all-segment check, so no phase-1 event dates on or after the phase-3 entry |
+| **3 Column review** | views M/P/PP/B0G/G vs the D8 outcome list; never_features; S-only suspects; file columns accounted for; typed lists = views | **0** issues (`P_attr_transferred_entry` is a pattern false positive) |
+| **Twins p1/p2** | row counts; every 100th row compared on all 147 columns | p1 1,498,497 = 1,498,497; p2 2,491,716 = 2,491,716; **0** differing columns (14,985 and 24,918 rows). The p3 twin was identical in the first pass |
+| **Rare levels → "other"** (RD-10), every row and segment | `judge`: raw first-judge ID re-derived for every row and aligned on (segment, position), < 10 rows per file → other. `M_` categoricals: < 10 segments per file → other | **0** in all three files (judge levels → other: p1 68, p2 53, p3 18; M levels → other match the data-report counts) |
+| **M values** | 200 random cells against the case table (seed 2028), plus every segment for all 22 M and 6 S columns | **0** and **0** |
+
+**Note on the twin "column hash".** The string-rendered MD5 of the 1% sample differs between CSV and parquet, because the text rendering of a float such as `1.0` is not the same as the text read back from the CSV. I therefore compared every column exactly as strings, or numerically within 1e-9 where the strings differ. All 147 columns matched.
+
+**Non-blocking concerns still open.** These are already written up as limitations in the data report:
+1. Global counts use only closed case-table cases, which causes undercounting near 2016 and a mild selection on future closure.
+2. The case-table `District_Judge` and `Magistrate_Judge` may be the judge at the end of the case.
+3. RD-13: the 875 dropped phase-1 segments are all positive.
+
+The first-pass findings (D2 exit, self-inclusion in the filed counts, the undocumented distinct-judges definition) are all resolved.
+
+## G2 — data audit (first pass, superseded by the re-audit above)
+
+**Auditor:** A4 Verifier, 2026-10-21. **Verdict (first pass): FAIL** (one blocking defect, the D2 phase-1 exit date; it also causes leakage).
+
+**Method.** I re-derived everything from `data/raw/*` with my own code (`verification/g2_data_audit.py`) and never opened `court/data_prep/`, `court/court_confs.py` or `tests/test_data_prep.py`. Specs used: PLAN §0.3/§1/§2/§6, DECISIONS D1–D12, `court/SCHEMA.md`, RUN_DECISIONS RD-06..RD-14. The first-pass evidence files are in commit 8563f49; they were overwritten by the re-audit. Run it with `G2_CACHE=<dir> python verification/g2_data_audit.py`; it takes about 15 s once the event-log subset is cached. Adding `G2_TARGETED=1` runs the supplementary sample instead.
 
 **My reading of D1–D4 on the raw case table**
 
