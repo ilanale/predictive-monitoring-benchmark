@@ -12,7 +12,7 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 | G3 pipeline | 05:19 | ✅ 02:47 |
 | G4 review → Tier 1a | 05:34 | ✅ 05:48 (PASS, no blockers; queue started 02:48 per RD-23) |
 | Tier-1b projection / cut check | 07:34 | |
-| G5 Tier 1 + Tier-2 cut-off | 08:04 | |
+| G5 Tier 1 + Tier-2 cut-off | 08:04 | ✅ 07:54 (72 done of 74 queued; 2 timeouts; Tier 2 not run) |
 | Writing starts (latest) | 08:19 | |
 | G6 results | 09:34 | |
 | Handoff | 09:49 | |
@@ -34,3 +34,4 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 - 05:50 · orchestrator · Tier-1b cut decided (RD-28): after the p1_reg tuning, the queue is replaced by the cut list (25 jobs, ETA ~07:35). Tier 2: not run (8h budget + usage-limit pause).
 - 06:02 · A5 · report generator, README, CHANGES_FROM_UPSTREAM merged (c546558); budget-cut jobs labelled from config (147c1cc). Draft report generated on a snapshot; final run after the queue.
 - 06:04 · orchestrator · Requeue hiccup: the switch script stopped only the old queue's caffeinate wrapper, so for ~1 min both queues ran and the old one logged 2 spurious FAILED rows (p1_reg prefix FS-M/FS-MP, killed). Old queue stopped by hand; the cut queue reruns those jobs. report.py keeps the last 'done' row per job.
+- 07:54 · queue · Tier 1 finished: 36/36 Tier-1a and 26/28 queued Tier-1b fits done, 10 tunings; R1 prefix_agg FS-B0+G and FS-ALL timed out (RD-29). Generating final report.
