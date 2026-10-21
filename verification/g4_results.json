@@ -1,0 +1,936 @@
+{
+ "columns_p1": {
+  "FS-M": {
+   "n_cols": 139,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "M"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-MP": {
+   "n_cols": 589,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "M",
+    "P",
+    "PP"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-B0": {
+   "n_cols": 562,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "B0G",
+    "M",
+    "P"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-B0+P": {
+   "n_cols": 594,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "B0G",
+    "M",
+    "P",
+    "PP"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-B0+G": {
+   "n_cols": 748,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 31,
+   "views": [
+    "B0G",
+    "G",
+    "M",
+    "P"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-ALL": {
+   "n_cols": 780,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 31,
+   "views": [
+    "B0G",
+    "G",
+    "M",
+    "P",
+    "PP"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-ALL+S": {
+   "n_cols": 786,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 31,
+   "views": [
+    "B0G",
+    "G",
+    "M",
+    "P",
+    "PP",
+    "S"
+   ],
+   "last_only_G": true,
+   "S_cols": 6,
+   "pass": true
+  }
+ },
+ "perturbation_p1": {
+  "fs": "FS-ALL+S",
+  "n_segments": 400,
+  "n_prefixes": 4336,
+  "n_prefixes_before_cut": 2538,
+  "max_abs_diff_before_cut": 0.0,
+  "share_changed_after_cut": 1.0,
+  "targets_randomised_max_abs_diff": 0.0,
+  "y_reg_changed_by_target_randomisation": true,
+  "pass": true
+ },
+ "columns_p2": {
+  "FS-M": {
+   "n_cols": 130,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "M"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-MP": {
+   "n_cols": 590,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "M",
+    "P",
+    "PP"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-B0": {
+   "n_cols": 563,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "B0G",
+    "M",
+    "P"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-B0+P": {
+   "n_cols": 595,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 0,
+   "views": [
+    "B0G",
+    "M",
+    "P",
+    "PP"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-B0+G": {
+   "n_cols": 749,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 31,
+   "views": [
+    "B0G",
+    "G",
+    "M",
+    "P"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-ALL": {
+   "n_cols": 781,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 31,
+   "views": [
+    "B0G",
+    "G",
+    "M",
+    "P",
+    "PP"
+   ],
+   "last_only_G": true,
+   "S_cols": 0,
+   "pass": true
+  },
+  "FS-ALL+S": {
+   "n_cols": 787,
+   "bad_sources": [],
+   "bad_names": [],
+   "n_last": 31,
+   "views": [
+    "B0G",
+    "G",
+    "M",
+    "P",
+    "PP",
+    "S"
+   ],
+   "last_only_G": true,
+   "S_cols": 6,
+   "pass": true
+  }
+ },
+ "perturbation_p2": {
+  "fs": "FS-ALL+S",
+  "n_segments": 400,
+  "n_prefixes": 8320,
+  "n_prefixes_before_cut": 4817,
+  "max_abs_diff_before_cut": 0.0,
+  "share_changed_after_cut": 1.0,
+  "targets_randomised_max_abs_diff": 0.0,
+  "y_reg_changed_by_target_randomisation": true,
+  "pass": true
+ },
+ "split_pred_p1": {
+  "clf": {
+   "n_train_segments": 102055,
+   "n_test_segments": 25522,
+   "overlap_segments": 0,
+   "split_ts": "2014-08-18 00:00:00",
+   "max_train_event_ts": "2014-08-17 00:00:00",
+   "train_event_on_or_after_split": 0,
+   "test_segments_starting_before_split": 0,
+   "train_inphase_starts_after_split": 0,
+   "court_split_identical": true,
+   "max_prefix_len": 26,
+   "prefix_ends_all_in_phase": true,
+   "FS-B0": {
+    "rows": 248411,
+    "expected_rows": 248411,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.0003644157841335,
+    "y_pred_median": 0.4131105542182922,
+    "y_pred_max": 0.9997490048408508,
+    "y_true_median": 0.0,
+    "auc": 0.8128879078980964,
+    "pos_rate": 0.4289021017587788,
+    "mean_pred": 0.4603496813756773
+   },
+   "FS-ALL": {
+    "rows": 248411,
+    "expected_rows": 248411,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.0002740932977758,
+    "y_pred_median": 0.3723325729370117,
+    "y_pred_max": 0.9996216297149658,
+    "y_true_median": 0.0,
+    "auc": 0.7924763366389291,
+    "pos_rate": 0.4289021017587788,
+    "mean_pred": 0.4274846271572975
+   }
+  },
+  "g_drift": {
+   "top": [
+    {
+     "col": "G_court_closed_last90",
+     "train_mean": 2061.0007859229377,
+     "test_mean": 2522.9033599229865,
+     "smd": 1.745447497874592,
+     "test_above_train_max": 0.16538020181163085,
+     "test_below_train_min": 0.002078806290830581
+    },
+    {
+     "col": "G_court_open_phase1",
+     "train_mean": 5239.890447211017,
+     "test_mean": 6580.933865358926,
+     "smd": 1.6507643186950929,
+     "test_above_train_max": 0.3533063832607263,
+     "test_below_train_min": 0.007540904699288114
+    },
+    {
+     "col": "G_judge_filed_last30",
+     "train_mean": 20.710940325497287,
+     "test_mean": 37.7884640202579,
+     "smd": 1.5379776455603098,
+     "test_above_train_max": 0.05546506314897298,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_judge_net_flow90",
+     "train_mean": 4.618562213103353,
+     "test_mean": 33.677959421422166,
+     "smd": 1.5232571416391925,
+     "test_above_train_max": 0.06487898626801952,
+     "test_below_train_min": 0.007582759859506179
+    },
+    {
+     "col": "G_court_closed_last30",
+     "train_mean": 706.0455531019613,
+     "test_mean": 861.2874821679578,
+     "smd": 1.5071901053062053,
+     "test_above_train_max": 0.0972155854664932,
+     "test_below_train_min": 0.0015904960882864845
+    },
+    {
+     "col": "open_cases",
+     "train_mean": 11797.629133050494,
+     "test_mean": 14219.134881741733,
+     "smd": 1.5011203918820224,
+     "test_above_train_max": 0.4632005943432751,
+     "test_below_train_min": 0.004433159053096759
+    },
+    {
+     "col": "G_judge_filed_last90",
+     "train_mean": 60.87024447071916,
+     "test_mean": 105.98129423131255,
+     "smd": 1.4969333595882808,
+     "test_above_train_max": 0.07897371147145303,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_court_filed_last90",
+     "train_mean": 2189.2602256920295,
+     "test_mean": 2608.52012361224,
+     "smd": 1.4650130919725306,
+     "test_above_train_max": 0.2567325769175767,
+     "test_below_train_min": 0.0077780839405238176
+    },
+    {
+     "col": "G_judge_open_same_type",
+     "train_mean": 224.55524325358186,
+     "test_mean": 400.1067725137163,
+     "smd": 1.3698415344822714,
+     "test_above_train_max": 0.055098830497064905,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_judge_net_flow30",
+     "train_mean": 1.307026359716233,
+     "test_mean": 12.891131240342794,
+     "smd": 1.3110402060503548,
+     "test_above_train_max": 0.046037188309853753,
+     "test_below_train_min": 0.0036100075688081396
+    }
+   ],
+   "by_year": {
+    "2003": {
+     "G_court_closed_last90": 1857.6,
+     "G_court_open_phase1": 4999.9,
+     "G_judge_filed_last30": 27.3,
+     "G_judge_net_flow90": 21.7,
+     "open_cases": 8851.9
+    },
+    "2004": {
+     "G_court_closed_last90": 2202.0,
+     "G_court_open_phase1": 5290.2,
+     "G_judge_filed_last30": 23.1,
+     "G_judge_net_flow90": 3.8,
+     "open_cases": 10200.2
+    },
+    "2005": {
+     "G_court_closed_last90": 1961.3,
+     "G_court_open_phase1": 4727.2,
+     "G_judge_filed_last30": 18.3,
+     "G_judge_net_flow90": -0.3,
+     "open_cases": 10156.3
+    },
+    "2006": {
+     "G_court_closed_last90": 1777.3,
+     "G_court_open_phase1": 4326.9,
+     "G_judge_filed_last30": 17.3,
+     "G_judge_net_flow90": 1.5,
+     "open_cases": 10134.0
+    },
+    "2007": {
+     "G_court_closed_last90": 1768.4,
+     "G_court_open_phase1": 4258.6,
+     "G_judge_filed_last30": 17.8,
+     "G_judge_net_flow90": 3.8,
+     "open_cases": 10393.0
+    },
+    "2008": {
+     "G_court_closed_last90": 1798.7,
+     "G_court_open_phase1": 4372.5,
+     "G_judge_filed_last30": 18.5,
+     "G_judge_net_flow90": 4.1,
+     "open_cases": 10807.0
+    },
+    "2009": {
+     "G_court_closed_last90": 1862.1,
+     "G_court_open_phase1": 4691.2,
+     "G_judge_filed_last30": 19.6,
+     "G_judge_net_flow90": 5.8,
+     "open_cases": 11548.3
+    },
+    "2010": {
+     "G_court_closed_last90": 1994.9,
+     "G_court_open_phase1": 4914.0,
+     "G_judge_filed_last30": 19.7,
+     "G_judge_net_flow90": 4.2,
+     "open_cases": 12257.5
+    },
+    "2011": {
+     "G_court_closed_last90": 2184.5,
+     "G_court_open_phase1": 5507.0,
+     "G_judge_filed_last30": 21.2,
+     "G_judge_net_flow90": 5.2,
+     "open_cases": 12784.0
+    },
+    "2012": {
+     "G_court_closed_last90": 2305.2,
+     "G_court_open_phase1": 6264.8,
+     "G_judge_filed_last30": 23.9,
+     "G_judge_net_flow90": 9.7,
+     "open_cases": 13702.0
+    },
+    "2013": {
+     "G_court_closed_last90": 2461.0,
+     "G_court_open_phase1": 6459.3,
+     "G_judge_filed_last30": 22.1,
+     "G_judge_net_flow90": -0.2,
+     "open_cases": 14018.9
+    },
+    "2014": {
+     "G_court_closed_last90": 2347.3,
+     "G_court_open_phase1": 6507.5,
+     "G_judge_filed_last30": 22.4,
+     "G_judge_net_flow90": 4.1,
+     "open_cases": 13788.3
+    },
+    "2015": {
+     "G_court_closed_last90": 2553.8,
+     "G_court_open_phase1": 6680.2,
+     "G_judge_filed_last30": 24.5,
+     "G_judge_net_flow90": 4.2,
+     "open_cases": 13622.1
+    },
+    "2016": {
+     "G_court_closed_last90": 2482.1,
+     "G_court_open_phase1": 6779.6,
+     "G_judge_filed_last30": 56.3,
+     "G_judge_net_flow90": 77.6,
+     "open_cases": 14845.1
+    },
+    "2017": {
+     "G_court_closed_last90": 2640.1,
+     "G_court_open_phase1": 5983.7,
+     "G_judge_filed_last30": 23.3,
+     "G_judge_net_flow90": -6.1,
+     "open_cases": 14563.5
+    },
+    "2018": {
+     "G_court_closed_last90": 2512.9,
+     "G_court_open_phase1": 4931.6,
+     "G_judge_filed_last30": 20.9,
+     "G_judge_net_flow90": -18.0,
+     "open_cases": 12398.7
+    },
+    "2019": {
+     "G_court_closed_last90": 1915.6,
+     "G_court_open_phase1": 2324.7,
+     "G_judge_filed_last30": 0.9,
+     "G_judge_net_flow90": -74.6,
+     "open_cases": 7152.8
+    },
+    "2020": {
+     "G_court_closed_last90": 992.8,
+     "G_court_open_phase1": 340.3,
+     "G_judge_filed_last30": 0.0,
+     "G_judge_net_flow90": -42.7,
+     "open_cases": 2287.9
+    },
+    "2021": {
+     "G_court_closed_last90": 223.2,
+     "G_court_open_phase1": 16.7,
+     "G_judge_filed_last30": 0.0,
+     "G_judge_net_flow90": -2.4,
+     "open_cases": 118.7
+    }
+   }
+  },
+  "reg": {
+   "n_train_segments": 102055,
+   "n_test_segments": 25522,
+   "overlap_segments": 0,
+   "split_ts": "2014-08-18 00:00:00",
+   "max_train_event_ts": "2014-08-17 00:00:00",
+   "train_event_on_or_after_split": 0,
+   "test_segments_starting_before_split": 0,
+   "train_inphase_starts_after_split": 0,
+   "court_split_identical": true,
+   "max_prefix_len": 25,
+   "prefix_ends_all_in_phase": true,
+   "FS-B0": {
+    "rows": 245924,
+    "expected_rows": 245924,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.0724119605726469,
+    "y_pred_median": 100.32552425369866,
+    "y_pred_max": 1765.971195839107,
+    "y_true_median": 105.0,
+    "mae": 145.48669065852494,
+    "mae_if_pred_were_log_scale": 197.10947838101882,
+    "mean_pred": 125.21124542596371,
+    "mean_true": 201.62647403262795,
+    "mae_const_test_median": 156.31357248580863
+   },
+   "FS-ALL": {
+    "rows": 245924,
+    "expected_rows": 245924,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.1626343881514044,
+    "y_pred_median": 92.42390770089004,
+    "y_pred_max": 2185.9095781800957,
+    "y_true_median": 105.0,
+    "mae": 145.51403121405295,
+    "mae_if_pred_were_log_scale": 197.1948669656864,
+    "mean_pred": 115.41008652609887,
+    "mean_true": 201.62647403262795,
+    "mae_const_test_median": 156.31357248580863
+   }
+  }
+ },
+ "split_pred_p2": {
+  "clf": {
+   "n_train_segments": 48329,
+   "n_test_segments": 12083,
+   "overlap_segments": 0,
+   "split_ts": "2015-02-11 00:00:00",
+   "max_train_event_ts": "2015-02-10 00:00:00",
+   "train_event_on_or_after_split": 0,
+   "test_segments_starting_before_split": 0,
+   "train_inphase_starts_after_split": 0,
+   "court_split_identical": true,
+   "max_prefix_len": 40,
+   "prefix_ends_all_in_phase": true,
+   "FS-B0": {
+    "rows": 201322,
+    "expected_rows": 201322,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.0082280589267611,
+    "y_pred_median": 0.02870382089167825,
+    "y_pred_max": 0.8745813369750977,
+    "y_true_median": 0.0,
+    "auc": 0.7876697363577744,
+    "pos_rate": 0.03992112138762778,
+    "mean_pred": 0.042878943001456615
+   },
+   "FS-ALL": {
+    "rows": 201322,
+    "expected_rows": 201322,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.0087440982460975,
+    "y_pred_median": 0.0373217836022377,
+    "y_pred_max": 0.8066858649253845,
+    "y_true_median": 0.0,
+    "auc": 0.7533841235340691,
+    "pos_rate": 0.03992112138762778,
+    "mean_pred": 0.04716336635743448
+   }
+  },
+  "g_drift": {
+   "top": [
+    {
+     "col": "G_judge_open_phase2",
+     "train_mean": 154.55114124432447,
+     "test_mean": 373.75551519865286,
+     "smd": 2.5823192886737694,
+     "test_above_train_max": 0.10815943577526155,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_judge_open_same_phase",
+     "train_mean": 154.55114124432447,
+     "test_mean": 373.75551519865286,
+     "smd": 2.5823192886737694,
+     "test_above_train_max": 0.10815943577526155,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_judge_open_same_type",
+     "train_mean": 212.0888224264926,
+     "test_mean": 504.2511789291661,
+     "smd": 2.1441579320504673,
+     "test_above_train_max": 0.09935097542465991,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_judge_share_of_court",
+     "train_mean": 0.024692407324214547,
+     "test_mean": 0.05328513442619071,
+     "smd": 2.0810000513623828,
+     "test_above_train_max": 0.10534284279560067,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_judge_open",
+     "train_mean": 293.7362131749651,
+     "test_mean": 593.2852687656451,
+     "smd": 1.7875473082649322,
+     "test_above_train_max": 0.09911311301484942,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_court_net_flow90",
+     "train_mean": 110.38132443130417,
+     "test_mean": -169.58383139708297,
+     "smd": -1.57870553894874,
+     "test_above_train_max": 0.028369811862160622,
+     "test_below_train_min": 0.3751920833349065
+    },
+    {
+     "col": "G_court_closed_last90",
+     "train_mean": 2070.8146426869325,
+     "test_mean": 2479.558625532831,
+     "smd": 1.5033827072468124,
+     "test_above_train_max": 0.18483419479798685,
+     "test_below_train_min": 0.0352187390271805
+    },
+    {
+     "col": "G_judge_hist_n_closed",
+     "train_mean": 1199.4413995724972,
+     "test_mean": 2619.147701229711,
+     "smd": 1.3992707470697052,
+     "test_above_train_max": 0.17996367878758132,
+     "test_below_train_min": 0.0
+    },
+    {
+     "col": "G_court_net_flow30",
+     "train_mean": 33.02823431038763,
+     "test_mean": -70.27350779093781,
+     "smd": -1.3179908933369906,
+     "test_above_train_max": 0.03316104040262932,
+     "test_below_train_min": 0.1701660128596725
+    },
+    {
+     "col": "G_court_closed_last30",
+     "train_mean": 708.5378117446284,
+     "test_mean": 843.6723539694706,
+     "smd": 1.2782799729262522,
+     "test_above_train_max": 0.09856187631909809,
+     "test_below_train_min": 0.029653513756376034
+    }
+   ],
+   "by_year": {
+    "2003": {
+     "G_judge_open_phase2": 106.8,
+     "G_judge_open_same_phase": 106.8,
+     "G_judge_open_same_type": 177.9,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 9137.9
+    },
+    "2004": {
+     "G_judge_open_phase2": 131.5,
+     "G_judge_open_same_phase": 131.5,
+     "G_judge_open_same_type": 202.8,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 10195.8
+    },
+    "2005": {
+     "G_judge_open_phase2": 140.2,
+     "G_judge_open_same_phase": 140.2,
+     "G_judge_open_same_type": 190.7,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 10157.5
+    },
+    "2006": {
+     "G_judge_open_phase2": 142.5,
+     "G_judge_open_same_phase": 142.5,
+     "G_judge_open_same_type": 184.7,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 10132.1
+    },
+    "2007": {
+     "G_judge_open_phase2": 147.7,
+     "G_judge_open_same_phase": 147.7,
+     "G_judge_open_same_type": 191.3,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 10393.6
+    },
+    "2008": {
+     "G_judge_open_phase2": 156.6,
+     "G_judge_open_same_phase": 156.6,
+     "G_judge_open_same_type": 199.5,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 10804.9
+    },
+    "2009": {
+     "G_judge_open_phase2": 162.8,
+     "G_judge_open_same_phase": 162.8,
+     "G_judge_open_same_type": 208.1,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 11548.8
+    },
+    "2010": {
+     "G_judge_open_phase2": 166.0,
+     "G_judge_open_same_phase": 166.0,
+     "G_judge_open_same_type": 208.8,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 12247.6
+    },
+    "2011": {
+     "G_judge_open_phase2": 161.2,
+     "G_judge_open_same_phase": 161.2,
+     "G_judge_open_same_type": 212.6,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 12774.6
+    },
+    "2012": {
+     "G_judge_open_phase2": 162.4,
+     "G_judge_open_same_phase": 162.4,
+     "G_judge_open_same_type": 232.9,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 13694.7
+    },
+    "2013": {
+     "G_judge_open_phase2": 159.2,
+     "G_judge_open_same_phase": 159.2,
+     "G_judge_open_same_type": 234.7,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 14015.2
+    },
+    "2014": {
+     "G_judge_open_phase2": 160.8,
+     "G_judge_open_same_phase": 160.8,
+     "G_judge_open_same_type": 249.0,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 13832.1
+    },
+    "2015": {
+     "G_judge_open_phase2": 176.6,
+     "G_judge_open_same_phase": 176.6,
+     "G_judge_open_same_type": 280.9,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 13642.5
+    },
+    "2016": {
+     "G_judge_open_phase2": 381.7,
+     "G_judge_open_same_phase": 381.7,
+     "G_judge_open_same_type": 564.1,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 14886.0
+    },
+    "2017": {
+     "G_judge_open_phase2": 383.2,
+     "G_judge_open_same_phase": 383.2,
+     "G_judge_open_same_type": 499.2,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 14299.7
+    },
+    "2018": {
+     "G_judge_open_phase2": 470.0,
+     "G_judge_open_same_phase": 470.0,
+     "G_judge_open_same_type": 574.3,
+     "G_judge_share_of_court": 0.1,
+     "open_cases": 12303.3
+    },
+    "2019": {
+     "G_judge_open_phase2": 356.2,
+     "G_judge_open_same_phase": 356.2,
+     "G_judge_open_same_type": 408.0,
+     "G_judge_share_of_court": 0.1,
+     "open_cases": 7172.6
+    },
+    "2020": {
+     "G_judge_open_phase2": 758.5,
+     "G_judge_open_same_phase": 758.5,
+     "G_judge_open_same_type": 773.8,
+     "G_judge_share_of_court": 0.4,
+     "open_cases": 2114.7
+    },
+    "2021": {
+     "G_judge_open_phase2": 2.9,
+     "G_judge_open_same_phase": 2.9,
+     "G_judge_open_same_type": 2.6,
+     "G_judge_share_of_court": 0.0,
+     "open_cases": 123.9
+    }
+   }
+  },
+  "reg": {
+   "n_train_segments": 48329,
+   "n_test_segments": 12083,
+   "overlap_segments": 0,
+   "split_ts": "2015-02-11 00:00:00",
+   "max_train_event_ts": "2015-02-10 00:00:00",
+   "train_event_on_or_after_split": 0,
+   "test_segments_starting_before_split": 0,
+   "train_inphase_starts_after_split": 0,
+   "court_split_identical": true,
+   "max_prefix_len": 40,
+   "prefix_ends_all_in_phase": true,
+   "FS-B0": {
+    "rows": 201322,
+    "expected_rows": 201322,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 2.185931062413266,
+    "y_pred_median": 268.52787567660687,
+    "y_pred_max": 2249.117243884286,
+    "y_true_median": 273.0,
+    "mae": 226.22620433813506,
+    "mae_if_pred_were_log_scale": 369.8255782749534,
+    "mean_pred": 318.5571524315749,
+    "mean_true": 375.25328578098765,
+    "mae_const_test_median": 254.76296678952127
+   },
+   "FS-ALL": {
+    "rows": 201322,
+    "expected_rows": 201322,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.7244072537187425,
+    "y_pred_median": 243.2464525203972,
+    "y_pred_max": 2251.9805938738677,
+    "y_true_median": 273.0,
+    "mae": 220.25946429099687,
+    "mae_if_pred_were_log_scale": 369.9443008447566,
+    "mean_pred": 288.39278971219505,
+    "mean_true": 375.25328578098765,
+    "mae_const_test_median": 254.76296678952127
+   }
+  }
+ },
+ "split_pred_p3": {
+  "clf": {
+   "n_train_segments": 1987,
+   "n_test_segments": 497,
+   "overlap_segments": 0,
+   "split_ts": "2015-06-10 00:00:00",
+   "max_train_event_ts": "2015-06-09 00:00:00",
+   "train_event_on_or_after_split": 0,
+   "test_segments_starting_before_split": 0,
+   "train_inphase_starts_after_split": 0,
+   "court_split_identical": true,
+   "max_prefix_len": 40,
+   "prefix_ends_all_in_phase": true,
+   "FS-B0": {
+    "rows": 13270,
+    "expected_rows": 13270,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 7.42626070859842e-05,
+    "y_pred_median": 0.9963836967945099,
+    "y_pred_max": 0.9999712705612184,
+    "y_true_median": 1.0,
+    "auc": 0.9276788718260139,
+    "pos_rate": 0.7645817633760361,
+    "mean_pred": 0.7959680361693375
+   },
+   "FS-ALL": {
+    "rows": 13270,
+    "expected_rows": 13270,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 0.0002744251105468,
+    "y_pred_median": 0.9956575334072114,
+    "y_pred_max": 0.9999641180038452,
+    "y_true_median": 1.0,
+    "auc": 0.9230073986380155,
+    "pos_rate": 0.7645817633760361,
+    "mean_pred": 0.8143824557037335
+   }
+  },
+  "reg": {
+   "n_train_segments": 1987,
+   "n_test_segments": 497,
+   "overlap_segments": 0,
+   "split_ts": "2015-06-10 00:00:00",
+   "max_train_event_ts": "2015-06-09 00:00:00",
+   "train_event_on_or_after_split": 0,
+   "test_segments_starting_before_split": 0,
+   "train_inphase_starts_after_split": 0,
+   "court_split_identical": true,
+   "max_prefix_len": 40,
+   "prefix_ends_all_in_phase": true,
+   "FS-B0": {
+    "rows": 13270,
+    "expected_rows": 13270,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": 1.1188473847022522,
+    "y_pred_median": 293.8504058451606,
+    "y_pred_max": 4330.018637281447,
+    "y_true_median": 306.0,
+    "mae": 283.5205582829594,
+    "mae_if_pred_were_log_scale": 381.2335158227033,
+    "mean_pred": 380.0216540042443,
+    "mean_true": 386.66330067822156,
+    "mae_const_test_median": 259.6260738507913
+   },
+   "FS-ALL": {
+    "rows": 13270,
+    "expected_rows": 13270,
+    "only_in_pred": 0,
+    "only_expected": 0,
+    "y_true_mismatch": 0,
+    "y_pred_min": -0.1165880907381259,
+    "y_pred_median": 175.05566283564065,
+    "y_pred_max": 2820.5244319791595,
+    "y_true_median": 306.0,
+    "mae": 285.67271360056367,
+    "mae_if_pred_were_log_scale": 381.7080903237802,
+    "mean_pred": 260.8832823966861,
+    "mean_true": 386.66330067822156,
+    "mae_const_test_median": 259.6260738507913
+   }
+  }
+ }
+}

@@ -1,5 +1,123 @@
 # VERIFICATION
 
+## G4 — leakage & code review (A4, 2026-10-21, code at `938480c`)
+
+**Verdict: PASS.** No blockers. I found no leakage path in the pipeline and no misalignment of targets or predictions. Both patterns the builder raised are explained by the data, not by a code bug (see Check 9).
+
+**Evidence.**
+- Script: `verification/g4_leakage_checks.py`. Raw output: `verification/g4_results.json`.
+- The script used samples of 400 segments for phases 1 and 2. The split and prediction checks read selected columns of the full logs, plus the Tier-1a prediction files in the main repo's `results/` (read-only).
+- Load: 2 threads, 19 s wall time, peak 5.4 GB. The peak went over the 4 GB guideline for a few seconds while the full phase-2 log was in memory.
+
+### Check 1 — D7: features use only events up to the prefix end — PASS
+- **Code review.**
+  - `court/fast_pipeline.py` takes static values as the first non-null value, gated on `first_pos <= r` (`_first_nonnull`, l.266–274).
+  - Dynamic categorical columns are cumulative counts at row r (l.233–243). Running statistics are taken at position r (`running_num_stats`). C8 uses a per-segment ffill read at r (l.251–254).
+- **Perturbation test.**
+  - Setup: FS-ALL+S, the superset of all columns. One random in-phase cut per segment.
+  - Every column of every event after the cut was perturbed: numeric, categorical, static, `label` and `remaining_in_phase`.
+  - Phase 1: 2,538 of 4,336 prefixes end at or before the cut. Their max |ΔX| = 0. 100% of the prefixes past the cut change, so the perturbation took effect.
+  - Phase 2: 4,817 of 8,320 prefixes, max |ΔX| = 0, 100% changed after the cut.
+- **Data side.** The G features use the event date and were already checked against brute force in G2. There are no same-day future events: same-day order is the upstream (timestamp, activity) order (RD-22), and the label depends only on the date.
+
+### Check 2 — targets never enter X — PASS
+- Randomising `label` and `remaining_in_phase` on every row leaves X bit-identical (max |ΔX| = 0, phases 1 and 2). `y_reg` does change, as it should.
+- **Column audit per FS** (phases 1 and 2; FS-M, FS-MP, FS-B0, FS-B0+P, FS-B0+G, FS-ALL, FS-ALL+S): no matrix column comes from `remaining_in_phase`, `label`, `in_phase`, `n_hist`, `entry_date`/`exit_date`, `filing_year`, `ucid`, `segment_id` or `timestamp`, or from any `excluded` pattern.
+- `get_spec` also raises if such a column is requested (`feature_sets.py` l.90–92).
+- `S_` columns appear only in `+S` runs.
+
+### Check 3 — strict temporal split — PASS
+- Checked on the full logs, with the upstream `DatasetManager.split_data_strict` as the runner calls it. Results:
+
+| Phase | Train / test segments | Overlap | `split_ts` | Max train event | Train events ≥ split | Test segments starting before split |
+|---|---|---|---|---|---|---|
+| 1 | 102,055 / 25,522 | 0 | 2014-08-18 | 2014-08-17 | 0 | 0 |
+| 2 | 48,329 / 12,083 | 0 | 2015-02-11 | 2015-02-10 | 0 | 0 |
+| 3 | 1,987 / 497 | 0 | 2015-06-10 | 2015-06-09 | 0 | 0 |
+
+- The court re-implementation (`data_io.split_data_strict`) gives the identical split in all three phases.
+- Tuning (`court/tune.py` l.72–90) splits first, deletes the test part, and runs the 3-fold CV on training segments only.
+
+### Check 4 — fitting on train only — PASS
+- The vocabulary is built on the training log only (`runner.py` l.162–163).
+- Dummy columns are kept only if non-zero in train (`fit_columns`, l.209–211, re-applied per bucket l.129–133). Test values unseen in train map to 0.
+- There are no scalers.
+- Train and test matrices come from the same `FastEncoder._layout`, so G and `last_` columns have the same names and order in both. Both are column-subset with the same mask.
+- In tuning, the vocabulary spans all CV folds, but dummy columns are pruned per fold-train, so the result is equivalent.
+
+### Check 5 — log1p / expm1 / MAE in days — PASS
+- The code applies `log1p` once to the training target (`runner.target`). Predictions get `expm1` once (`runner.py` l.222; `tune.py` l.101). The fallback is the log1p of the median. MAE is computed on days (`evaluate.reg_metrics`).
+- In the saved files, y_pred is on the day scale:
+  - R1: median 100 vs a y_true median of 105, max 1,766.
+  - R2: median 269 vs 273.
+  - If y_pred were still on the log scale, MAE would be 197 instead of 145. A double `expm1` would give astronomically large values.
+
+### Check 6 — C6/C7 prefixes — PASS
+- Every test prefix end is an in-phase event (`prefix_ends_all_in_phase` = True in all 6 tasks).
+- `prefix_len` in the predictions is j (`prefix_nr`).
+- L = min(40, q90 in-phase length) = 26 (T1), 25 (R1), 40 (T2, R2, T3, R3).
+- The training gap is 3 and the test gap is 1.
+
+### Check 7 — C8 last-value encoding — PASS
+- `last_*` columns (31) exist only in FS-B0+G, FS-ALL and FS-ALL+S, and only for G-view columns (`feature_sets.py` l.115). There are none for `open_cases` (B0G).
+- The upstream `LastValueOfColsTransformer` does the same thing (`groupby.last()` = last non-null).
+
+### Check 8 — prediction alignment and bootstrap — PASS
+- Checked for T1/R1/T2/R2/T3/R3 × FS-B0 and FS-ALL (Tier 1a).
+- In every file, the (segment_id, prefix_len) rows equal the test prefixes rebuilt from the raw log and split: 0 rows only in the file, 0 rows only rebuilt.
+- y_true equals the raw-log label or `remaining_in_phase` at the prefix end, with **0 mismatches** out of 248,411 / 245,924 / 201,322 / 201,322 / 13,270 / 13,270 rows.
+- `pos_label`: the predicted probability is taken for class 1 = `deviant` (`runner.py` l.137). Mean predictions match the positive rates (T1 0.46 vs 0.43; T2 0.043 vs 0.040; T3 0.80 vs 0.76), so the labels are not flipped.
+- The paired bootstrap resamples whole test segments (`evaluate.paired_bootstrap`).
+
+### Check 9 — the builder's sanity concerns — real effects, not bugs
+1. **Regression only modestly better than the median (2% run: often worse; full run: R1 145 vs 156).**
+   - Alignment and the inverse transform are correct (Checks 5 and 8).
+   - The baseline is strong. The train median (156.3) is almost the MAE-optimal constant: the test median gives 156.3.
+   - A log1p model with squared error predicts roughly the conditional median, which suits MAE. The heavy tail (mean 202 vs median 105 days) limits the possible gain.
+   - **R3:** a 1,987-segment train set, and a target shift (the test-median constant has MAE 260, below the train-median baseline's 294). Together these explain the negative R² on the log scale.
+   - On a 2% sample, the train set holds only about 2k segments, so losing to the median is expected.
+2. **T2 AUC below 0.5 on the 2% run.**
+   - T2 has a 4% positive rate, so a 2% test set holds only about 10 positive segments, and AUC is pure noise.
+   - At full scale, T2 AUC is 0.75–0.80, calibration matches the positive rate, and there is no label flip.
+3. **G+ lowers classification AUC (T1 0.813 → 0.792; T2 0.788 → 0.753).** This is not a train/test misalignment (Checks 4 and 7). It is strong **temporal drift** in the G columns between the train and test periods (in-phase rows; full data):
+   - Standardised mean differences of +1.5 to +2.6 SD. Phase 1: `G_court_closed_last90` +1.7, `G_court_open_phase1` +1.7 (35% of test values above the train maximum), `open_cases` +1.5 (46% above the train maximum).
+   - Phase 2: `G_judge_open_phase2` / `_same_phase` +2.6, `G_judge_open` +1.8, `G_court_net_flow90` −1.6 (38% of test values below the train minimum), `G_judge_hist_n_closed` +1.4 (cumulative, so it grows over time).
+   - Yearly means break inside the test period:
+     - Judge-level counts double in 2016. `G_judge_filed_last30` goes 24 → 56 and `G_judge_open_phase2` goes 177 → 382.
+     - Court-level counts collapse after 2018 (`open_cases` falls from 12.4k to 0.1k by 2021).
+     - The collapse is the closed-cases-only right-censoring already raised in G2 concern 4.
+   - Trees cannot extrapolate, so out-of-range G values hurt the ranking. The tuning CV uses random folds inside the training period, which hides the drift (T1 FS-ALL CV AUC 0.857 vs test 0.792).
+   - Regression improves slightly with G+ (R2 226 → 220), which fits G carrying real congestion signal.
+
+### Blocking
+None.
+
+### Non-blocking concerns (ranked)
+1. **The G+ (and `open_cases`) values are non-stationary and partly a data artifact.** This threatens the validity of the RQ3 G conclusions.
+   - The data shows a judge-level break in 2016 and right-censoring of the closed-cases-only case table after about 2017. The test period runs into 2021 (events of cases filed up to 2016).
+   - A2 should check the 2016 judge-level jump: per-judge counts by year, and whether `District_Judge` is the end-of-case judge (G2 concern 5).
+   - Suggested Tier-2 sensitivity runs:
+     - (a) evaluate on test prefixes dated ≤ 2016-12-31;
+     - (b) detrended or relative G (e.g. the judge's share, or the ratio to the court's trailing-year mean) instead of raw counts.
+   - Report the G+ result as "hurts under temporal drift", not as "G carries no information".
+2. **Tuning CV uses random (not temporal) folds inside train,** as upstream does. It is optimistic and can favour drifting features such as G. Note this in the limitations.
+3. **The max prefix length L (C7) is computed on the full log, train plus test** (`runner.py` l.204, `tune.py` l.71), as upstream does. This is a mild use of test information for a hyperparameter; the effect on results is negligible.
+4. **The regression empty-bucket fallback is the median over train *events*,** pre-phase rows included (`DatasetManager.get_class_ratio`), not over train prefixes. It is used only for test buckets with no training prefixes, which is rare.
+5. **Train-segment labels and regression targets can lie after `split_ts`.** Upstream's strict split has the same property, so it is inherited from the paper's design, not a leak into features.
+
+### Check 10 — diff review against upstream (`git diff 2212f02..HEAD -- experiments/ transformers/ bucketers/`) — PASS
+- Seven files changed: `DatasetManager.py`, `EncoderFactory.py`, `dataset_confs.py`, `experiments.py`, `optimize_params.py`, `bucketers/PrefixLengthBucketer.py`, and the new `transformers/LastValueOfColsTransformer.py`.
+- Each one has the change-notice header on line 1, and each is listed in the research section of `CHANGES_FROM_UPSTREAM.md`.
+- Every behavioural change is gated by config:
+  - `task_type` and `n_hist_col` are set only for datasets registered by `court_confs`, and only when `PPM_COURT_DATA_DIR` is set.
+  - `PrefixLengthBucketer` switches only if both `n_hist` and `prefix_nr` are present.
+  - `lastG` is used only if `global_cols` is non-empty.
+  - The static-only path is used only when a dataset has no dynamic columns, which never happens for upstream datasets.
+- **DoD-4:** `tests/test_compat_smoke.py` runs 3/3 OK: identical features, predictions and AUC to the compat commit.
+
+### Check 11 — test suite (DoD-3) — PASS
+- `PYTHONPATH=$PWD:$PWD/experiments python -m unittest discover -s tests -t .` → **Ran 46 tests in 54.8 s, OK** (at `938480c`, 2 threads).
+
 ## G2 — re-audit
 
 **Auditor:** A4 Verifier, 2026-10-21. **Verdict: PASS.**
