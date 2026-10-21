@@ -10,7 +10,7 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 | G1 port | 03:19 | ✅ 02:19 |
 | G2 data | 04:04 | ✅ 02:31 (re-audit PASS after D2 fix) |
 | G3 pipeline | 05:19 | ✅ 02:47 |
-| G4 review → Tier 1a | 05:34 | |
+| G4 review → Tier 1a | 05:34 | ✅ 05:48 (PASS, no blockers; queue started 02:48 per RD-23) |
 | Tier-1b projection / cut check | 07:34 | |
 | G5 Tier 1 + Tier-2 cut-off | 08:04 | |
 | Writing starts (latest) | 08:19 | |
@@ -30,3 +30,4 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 - 02:49 · orchestrator · Tier 1a queue launched under caffeinate (RD-23); A4 G4 leakage review launched.
 - 02:51–05:40 · orchestrator · Claude usage limit hit; A4 (G4 review) and A5 (writer) were paused until 05:40. The queue kept running unattended.
 - 05:41 · queue · Tier 1a complete (42 jobs; tune p2_reg timed out → default params, tune p1_reg on half sample). Tier 1b: T1 done, R1 tuning. Regression beats the median baselines (R1 145 vs 156 d, R2 220 vs 257 d). G+ lowers classification AUC (T1 0.813 → 0.792) → under G4 review. Projected Tier 1b end ≈ 08:00; cut check at 07:34. Tier 2 most likely not run.
+- 05:48 · A4 · G4 PASS (5a3a7a5): 46 tests OK; perturbation, label-randomisation, column, split and alignment checks clean. The G+ AUC drop is strong temporal drift in the G features (test values 1.5–2.6 SD off; court counts collapse after 2018 because the case table holds only closed cases), not a bug.
