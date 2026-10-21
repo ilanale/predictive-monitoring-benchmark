@@ -145,6 +145,9 @@ def job_status_table(cfg, runs, results_dir):
             status, reason = "not run", PHASE2_REASON
         elif jid == running:
             status, reason = "running", "in progress at report time"
+        elif any(c["pattern"] in jid for c in cfg.get("cut_jobs", [])):
+            status = "not run"
+            reason = next(c["reason"] for c in cfg["cut_jobs"] if c["pattern"] in jid)
         else:
             status, reason = "not run", "not reached by the queue at report time"
         rows.append(dict(job_id=jid, kind=j["kind"], tier=j["tier"] if j["kind"] == "fit" else tier,

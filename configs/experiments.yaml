@@ -25,3 +25,15 @@ tiers:
     extra_jobs:
       - {task: court_p1_clf, method: single_agg, fs: FS-ALL+S, learner: xgboost}
       - {task: court_p1_reg, method: single_agg, fs: FS-ALL+S, learner: xgboost}
+# Jobs cut by budget decisions (RUN_DECISIONS.md); court.report labels them with the reason.
+cut_jobs:
+  - {pattern: "tier1b__court_p2_clf__prefix_agg__FS-M__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tier1b__court_p2_clf__prefix_agg__FS-MP__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tier1b__court_p2_clf__prefix_agg__FS-B0+P__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tier1b__court_p2_clf__prefix_agg__FS-B0+G__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tier1b__court_p2_reg__prefix_agg__FS-M__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tier1b__court_p2_reg__prefix_agg__FS-MP__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tier1b__court_p2_reg__prefix_agg__FS-B0+P__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tier1b__court_p2_reg__prefix_agg__FS-B0+G__", reason: "cut by RD-28 (8h budget)"}
+  - {pattern: "tune__court_p2_reg__prefix_agg__", reason: "skipped by RD-28; fits use XGBoost default params"}
+  - {pattern: "tier2__", reason: "not run: 8h budget and the 02:51–05:40 usage-limit pause (RD-25)"}
