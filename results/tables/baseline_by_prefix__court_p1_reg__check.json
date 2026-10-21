@@ -1,0 +1,8 @@
+{
+ "max_len": 25,
+ "gap_train": 3,
+ "mae_overall": 156.31447520372149,
+ "mae_per_prefix": 155.97094630861568,
+ "n_test_prefixes": 245924,
+ "ref_overall": 156.31447520372149
+}

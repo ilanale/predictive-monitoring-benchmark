@@ -1,0 +1,141 @@
+job_id,kind,tier,queue_tier,task,method,fs,learner,status,reason
+tune__court_p1_clf__single_agg__xgboost,tune,tune,tier1a,court_p1_clf,single_agg,FS-ALL,xgboost,done,
+tier1a__court_p1_clf__single_agg__FS-M__xgboost,fit,tier1a,tier1a,court_p1_clf,single_agg,FS-M,xgboost,done,
+tier1a__court_p1_clf__single_agg__FS-MP__xgboost,fit,tier1a,tier1a,court_p1_clf,single_agg,FS-MP,xgboost,done,
+tier1a__court_p1_clf__single_agg__FS-B0__xgboost,fit,tier1a,tier1a,court_p1_clf,single_agg,FS-B0,xgboost,done,
+tier1a__court_p1_clf__single_agg__FS-B0+P__xgboost,fit,tier1a,tier1a,court_p1_clf,single_agg,FS-B0+P,xgboost,done,
+tier1a__court_p1_clf__single_agg__FS-B0+G__xgboost,fit,tier1a,tier1a,court_p1_clf,single_agg,FS-B0+G,xgboost,done,
+tier1a__court_p1_clf__single_agg__FS-ALL__xgboost,fit,tier1a,tier1a,court_p1_clf,single_agg,FS-ALL,xgboost,done,
+tune__court_p1_reg__single_agg__xgboost,tune,tune,tier1a,court_p1_reg,single_agg,FS-ALL,xgboost,done,timeout_halved;train_frac=0.5
+tier1a__court_p1_reg__single_agg__FS-M__xgboost,fit,tier1a,tier1a,court_p1_reg,single_agg,FS-M,xgboost,done,
+tier1a__court_p1_reg__single_agg__FS-MP__xgboost,fit,tier1a,tier1a,court_p1_reg,single_agg,FS-MP,xgboost,done,
+tier1a__court_p1_reg__single_agg__FS-B0__xgboost,fit,tier1a,tier1a,court_p1_reg,single_agg,FS-B0,xgboost,done,
+tier1a__court_p1_reg__single_agg__FS-B0+P__xgboost,fit,tier1a,tier1a,court_p1_reg,single_agg,FS-B0+P,xgboost,done,
+tier1a__court_p1_reg__single_agg__FS-B0+G__xgboost,fit,tier1a,tier1a,court_p1_reg,single_agg,FS-B0+G,xgboost,done,
+tier1a__court_p1_reg__single_agg__FS-ALL__xgboost,fit,tier1a,tier1a,court_p1_reg,single_agg,FS-ALL,xgboost,done,
+tune__court_p2_clf__single_agg__xgboost,tune,tune,tier1a,court_p2_clf,single_agg,FS-ALL,xgboost,done,
+tier1a__court_p2_clf__single_agg__FS-M__xgboost,fit,tier1a,tier1a,court_p2_clf,single_agg,FS-M,xgboost,done,
+tier1a__court_p2_clf__single_agg__FS-MP__xgboost,fit,tier1a,tier1a,court_p2_clf,single_agg,FS-MP,xgboost,done,
+tier1a__court_p2_clf__single_agg__FS-B0__xgboost,fit,tier1a,tier1a,court_p2_clf,single_agg,FS-B0,xgboost,done,
+tier1a__court_p2_clf__single_agg__FS-B0+P__xgboost,fit,tier1a,tier1a,court_p2_clf,single_agg,FS-B0+P,xgboost,done,
+tier1a__court_p2_clf__single_agg__FS-B0+G__xgboost,fit,tier1a,tier1a,court_p2_clf,single_agg,FS-B0+G,xgboost,done,
+tier1a__court_p2_clf__single_agg__FS-ALL__xgboost,fit,tier1a,tier1a,court_p2_clf,single_agg,FS-ALL,xgboost,done,
+tune__court_p2_reg__single_agg__xgboost,tune,tune,tier1a,court_p2_reg,single_agg,FS-ALL,xgboost,timeout,timeout_halved
+tier1a__court_p2_reg__single_agg__FS-M__xgboost,fit,tier1a,tier1a,court_p2_reg,single_agg,FS-M,xgboost,done,default_params
+tier1a__court_p2_reg__single_agg__FS-MP__xgboost,fit,tier1a,tier1a,court_p2_reg,single_agg,FS-MP,xgboost,done,default_params
+tier1a__court_p2_reg__single_agg__FS-B0__xgboost,fit,tier1a,tier1a,court_p2_reg,single_agg,FS-B0,xgboost,done,default_params
+tier1a__court_p2_reg__single_agg__FS-B0+P__xgboost,fit,tier1a,tier1a,court_p2_reg,single_agg,FS-B0+P,xgboost,done,default_params
+tier1a__court_p2_reg__single_agg__FS-B0+G__xgboost,fit,tier1a,tier1a,court_p2_reg,single_agg,FS-B0+G,xgboost,done,default_params
+tier1a__court_p2_reg__single_agg__FS-ALL__xgboost,fit,tier1a,tier1a,court_p2_reg,single_agg,FS-ALL,xgboost,done,default_params
+tune__court_p3_clf__single_agg__xgboost,tune,tune,tier1a,court_p3_clf,single_agg,FS-ALL,xgboost,done,
+tier1a__court_p3_clf__single_agg__FS-M__xgboost,fit,tier1a,tier1a,court_p3_clf,single_agg,FS-M,xgboost,done,
+tier1a__court_p3_clf__single_agg__FS-MP__xgboost,fit,tier1a,tier1a,court_p3_clf,single_agg,FS-MP,xgboost,done,
+tier1a__court_p3_clf__single_agg__FS-B0__xgboost,fit,tier1a,tier1a,court_p3_clf,single_agg,FS-B0,xgboost,done,
+tier1a__court_p3_clf__single_agg__FS-B0+P__xgboost,fit,tier1a,tier1a,court_p3_clf,single_agg,FS-B0+P,xgboost,done,
+tier1a__court_p3_clf__single_agg__FS-B0+G__xgboost,fit,tier1a,tier1a,court_p3_clf,single_agg,FS-B0+G,xgboost,done,
+tier1a__court_p3_clf__single_agg__FS-ALL__xgboost,fit,tier1a,tier1a,court_p3_clf,single_agg,FS-ALL,xgboost,done,
+tune__court_p3_reg__single_agg__xgboost,tune,tune,tier1a,court_p3_reg,single_agg,FS-ALL,xgboost,done,
+tier1a__court_p3_reg__single_agg__FS-M__xgboost,fit,tier1a,tier1a,court_p3_reg,single_agg,FS-M,xgboost,done,
+tier1a__court_p3_reg__single_agg__FS-MP__xgboost,fit,tier1a,tier1a,court_p3_reg,single_agg,FS-MP,xgboost,done,
+tier1a__court_p3_reg__single_agg__FS-B0__xgboost,fit,tier1a,tier1a,court_p3_reg,single_agg,FS-B0,xgboost,done,
+tier1a__court_p3_reg__single_agg__FS-B0+P__xgboost,fit,tier1a,tier1a,court_p3_reg,single_agg,FS-B0+P,xgboost,done,
+tier1a__court_p3_reg__single_agg__FS-B0+G__xgboost,fit,tier1a,tier1a,court_p3_reg,single_agg,FS-B0+G,xgboost,done,
+tier1a__court_p3_reg__single_agg__FS-ALL__xgboost,fit,tier1a,tier1a,court_p3_reg,single_agg,FS-ALL,xgboost,done,
+tune__court_p1_clf__prefix_agg__xgboost,tune,tune,tier1b,court_p1_clf,prefix_agg,FS-ALL,xgboost,done,
+tier1b__court_p1_clf__prefix_agg__FS-M__xgboost,fit,tier1b,tier1b,court_p1_clf,prefix_agg,FS-M,xgboost,done,
+tier1b__court_p1_clf__prefix_agg__FS-MP__xgboost,fit,tier1b,tier1b,court_p1_clf,prefix_agg,FS-MP,xgboost,done,
+tier1b__court_p1_clf__prefix_agg__FS-B0__xgboost,fit,tier1b,tier1b,court_p1_clf,prefix_agg,FS-B0,xgboost,done,
+tier1b__court_p1_clf__prefix_agg__FS-B0+P__xgboost,fit,tier1b,tier1b,court_p1_clf,prefix_agg,FS-B0+P,xgboost,done,
+tier1b__court_p1_clf__prefix_agg__FS-B0+G__xgboost,fit,tier1b,tier1b,court_p1_clf,prefix_agg,FS-B0+G,xgboost,done,
+tier1b__court_p1_clf__prefix_agg__FS-ALL__xgboost,fit,tier1b,tier1b,court_p1_clf,prefix_agg,FS-ALL,xgboost,done,
+tune__court_p1_reg__prefix_agg__xgboost,tune,tune,tier1b,court_p1_reg,prefix_agg,FS-ALL,xgboost,done,timeout_halved;train_frac=0.5
+tier1b__court_p1_reg__prefix_agg__FS-M__xgboost,fit,tier1b,tier1b,court_p1_reg,prefix_agg,FS-M,xgboost,done,
+tier1b__court_p1_reg__prefix_agg__FS-MP__xgboost,fit,tier1b,tier1b,court_p1_reg,prefix_agg,FS-MP,xgboost,done,
+tier1b__court_p1_reg__prefix_agg__FS-B0__xgboost,fit,tier1b,tier1b,court_p1_reg,prefix_agg,FS-B0,xgboost,done,
+tier1b__court_p1_reg__prefix_agg__FS-B0+P__xgboost,fit,tier1b,tier1b,court_p1_reg,prefix_agg,FS-B0+P,xgboost,done,
+tier1b__court_p1_reg__prefix_agg__FS-B0+G__xgboost,fit,tier1b,tier1b,court_p1_reg,prefix_agg,FS-B0+G,xgboost,timeout,timeout_halved
+tier1b__court_p1_reg__prefix_agg__FS-ALL__xgboost,fit,tier1b,tier1b,court_p1_reg,prefix_agg,FS-ALL,xgboost,timeout,timeout_halved
+tune__court_p2_clf__prefix_agg__xgboost,tune,tune,tier1b,court_p2_clf,prefix_agg,FS-ALL,xgboost,done,
+tier1b__court_p2_clf__prefix_agg__FS-M__xgboost,fit,tier1b,tier1b,court_p2_clf,prefix_agg,FS-M,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_clf__prefix_agg__FS-MP__xgboost,fit,tier1b,tier1b,court_p2_clf,prefix_agg,FS-MP,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_clf__prefix_agg__FS-B0__xgboost,fit,tier1b,tier1b,court_p2_clf,prefix_agg,FS-B0,xgboost,done,
+tier1b__court_p2_clf__prefix_agg__FS-B0+P__xgboost,fit,tier1b,tier1b,court_p2_clf,prefix_agg,FS-B0+P,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_clf__prefix_agg__FS-B0+G__xgboost,fit,tier1b,tier1b,court_p2_clf,prefix_agg,FS-B0+G,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_clf__prefix_agg__FS-ALL__xgboost,fit,tier1b,tier1b,court_p2_clf,prefix_agg,FS-ALL,xgboost,done,
+tune__court_p2_reg__prefix_agg__xgboost,tune,tune,tier1b,court_p2_reg,prefix_agg,FS-ALL,xgboost,not run,skipped by RD-28; fits use XGBoost default params
+tier1b__court_p2_reg__prefix_agg__FS-M__xgboost,fit,tier1b,tier1b,court_p2_reg,prefix_agg,FS-M,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_reg__prefix_agg__FS-MP__xgboost,fit,tier1b,tier1b,court_p2_reg,prefix_agg,FS-MP,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_reg__prefix_agg__FS-B0__xgboost,fit,tier1b,tier1b,court_p2_reg,prefix_agg,FS-B0,xgboost,done,default_params
+tier1b__court_p2_reg__prefix_agg__FS-B0+P__xgboost,fit,tier1b,tier1b,court_p2_reg,prefix_agg,FS-B0+P,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_reg__prefix_agg__FS-B0+G__xgboost,fit,tier1b,tier1b,court_p2_reg,prefix_agg,FS-B0+G,xgboost,not run,cut by RD-28 (8h budget)
+tier1b__court_p2_reg__prefix_agg__FS-ALL__xgboost,fit,tier1b,tier1b,court_p2_reg,prefix_agg,FS-ALL,xgboost,done,default_params
+tune__court_p3_clf__prefix_agg__xgboost,tune,tune,tier1b,court_p3_clf,prefix_agg,FS-ALL,xgboost,done,
+tier1b__court_p3_clf__prefix_agg__FS-M__xgboost,fit,tier1b,tier1b,court_p3_clf,prefix_agg,FS-M,xgboost,done,
+tier1b__court_p3_clf__prefix_agg__FS-MP__xgboost,fit,tier1b,tier1b,court_p3_clf,prefix_agg,FS-MP,xgboost,done,
+tier1b__court_p3_clf__prefix_agg__FS-B0__xgboost,fit,tier1b,tier1b,court_p3_clf,prefix_agg,FS-B0,xgboost,done,
+tier1b__court_p3_clf__prefix_agg__FS-B0+P__xgboost,fit,tier1b,tier1b,court_p3_clf,prefix_agg,FS-B0+P,xgboost,done,
+tier1b__court_p3_clf__prefix_agg__FS-B0+G__xgboost,fit,tier1b,tier1b,court_p3_clf,prefix_agg,FS-B0+G,xgboost,done,
+tier1b__court_p3_clf__prefix_agg__FS-ALL__xgboost,fit,tier1b,tier1b,court_p3_clf,prefix_agg,FS-ALL,xgboost,done,
+tune__court_p3_reg__prefix_agg__xgboost,tune,tune,tier1b,court_p3_reg,prefix_agg,FS-ALL,xgboost,done,
+tier1b__court_p3_reg__prefix_agg__FS-M__xgboost,fit,tier1b,tier1b,court_p3_reg,prefix_agg,FS-M,xgboost,done,
+tier1b__court_p3_reg__prefix_agg__FS-MP__xgboost,fit,tier1b,tier1b,court_p3_reg,prefix_agg,FS-MP,xgboost,done,
+tier1b__court_p3_reg__prefix_agg__FS-B0__xgboost,fit,tier1b,tier1b,court_p3_reg,prefix_agg,FS-B0,xgboost,done,
+tier1b__court_p3_reg__prefix_agg__FS-B0+P__xgboost,fit,tier1b,tier1b,court_p3_reg,prefix_agg,FS-B0+P,xgboost,done,
+tier1b__court_p3_reg__prefix_agg__FS-B0+G__xgboost,fit,tier1b,tier1b,court_p3_reg,prefix_agg,FS-B0+G,xgboost,done,
+tier1b__court_p3_reg__prefix_agg__FS-ALL__xgboost,fit,tier1b,tier1b,court_p3_reg,prefix_agg,FS-ALL,xgboost,done,
+tune__court_p1_clf__state_agg__xgboost,tune,tune,tier2,court_p1_clf,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_clf__state_agg__FS-B0__xgboost,fit,tier2,tier2,court_p1_clf,state_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_clf__state_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p1_clf,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p1_clf__cluster_agg__xgboost,tune,tune,tier2,court_p1_clf,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_clf__cluster_agg__FS-B0__xgboost,fit,tier2,tier2,court_p1_clf,cluster_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_clf__cluster_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p1_clf,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p1_clf__single_laststate__xgboost,tune,tune,tier2,court_p1_clf,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_clf__single_laststate__FS-B0__xgboost,fit,tier2,tier2,court_p1_clf,single_laststate,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_clf__single_laststate__FS-ALL__xgboost,fit,tier2,tier2,court_p1_clf,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p1_reg__state_agg__xgboost,tune,tune,tier2,court_p1_reg,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_reg__state_agg__FS-B0__xgboost,fit,tier2,tier2,court_p1_reg,state_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_reg__state_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p1_reg,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p1_reg__cluster_agg__xgboost,tune,tune,tier2,court_p1_reg,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_reg__cluster_agg__FS-B0__xgboost,fit,tier2,tier2,court_p1_reg,cluster_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_reg__cluster_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p1_reg,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p1_reg__single_laststate__xgboost,tune,tune,tier2,court_p1_reg,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_reg__single_laststate__FS-B0__xgboost,fit,tier2,tier2,court_p1_reg,single_laststate,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_reg__single_laststate__FS-ALL__xgboost,fit,tier2,tier2,court_p1_reg,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p2_clf__state_agg__xgboost,tune,tune,tier2,court_p2_clf,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_clf__state_agg__FS-B0__xgboost,fit,tier2,tier2,court_p2_clf,state_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_clf__state_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p2_clf,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p2_clf__cluster_agg__xgboost,tune,tune,tier2,court_p2_clf,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_clf__cluster_agg__FS-B0__xgboost,fit,tier2,tier2,court_p2_clf,cluster_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_clf__cluster_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p2_clf,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p2_clf__single_laststate__xgboost,tune,tune,tier2,court_p2_clf,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_clf__single_laststate__FS-B0__xgboost,fit,tier2,tier2,court_p2_clf,single_laststate,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_clf__single_laststate__FS-ALL__xgboost,fit,tier2,tier2,court_p2_clf,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p2_reg__state_agg__xgboost,tune,tune,tier2,court_p2_reg,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_reg__state_agg__FS-B0__xgboost,fit,tier2,tier2,court_p2_reg,state_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_reg__state_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p2_reg,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p2_reg__cluster_agg__xgboost,tune,tune,tier2,court_p2_reg,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_reg__cluster_agg__FS-B0__xgboost,fit,tier2,tier2,court_p2_reg,cluster_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_reg__cluster_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p2_reg,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p2_reg__single_laststate__xgboost,tune,tune,tier2,court_p2_reg,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_reg__single_laststate__FS-B0__xgboost,fit,tier2,tier2,court_p2_reg,single_laststate,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p2_reg__single_laststate__FS-ALL__xgboost,fit,tier2,tier2,court_p2_reg,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p3_clf__state_agg__xgboost,tune,tune,tier2,court_p3_clf,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_clf__state_agg__FS-B0__xgboost,fit,tier2,tier2,court_p3_clf,state_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_clf__state_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p3_clf,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p3_clf__cluster_agg__xgboost,tune,tune,tier2,court_p3_clf,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_clf__cluster_agg__FS-B0__xgboost,fit,tier2,tier2,court_p3_clf,cluster_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_clf__cluster_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p3_clf,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p3_clf__single_laststate__xgboost,tune,tune,tier2,court_p3_clf,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_clf__single_laststate__FS-B0__xgboost,fit,tier2,tier2,court_p3_clf,single_laststate,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_clf__single_laststate__FS-ALL__xgboost,fit,tier2,tier2,court_p3_clf,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p3_reg__state_agg__xgboost,tune,tune,tier2,court_p3_reg,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_reg__state_agg__FS-B0__xgboost,fit,tier2,tier2,court_p3_reg,state_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_reg__state_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p3_reg,state_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p3_reg__cluster_agg__xgboost,tune,tune,tier2,court_p3_reg,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_reg__cluster_agg__FS-B0__xgboost,fit,tier2,tier2,court_p3_reg,cluster_agg,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_reg__cluster_agg__FS-ALL__xgboost,fit,tier2,tier2,court_p3_reg,cluster_agg,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tune__court_p3_reg__single_laststate__xgboost,tune,tune,tier2,court_p3_reg,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_reg__single_laststate__FS-B0__xgboost,fit,tier2,tier2,court_p3_reg,single_laststate,FS-B0,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p3_reg__single_laststate__FS-ALL__xgboost,fit,tier2,tier2,court_p3_reg,single_laststate,FS-ALL,xgboost,not run,method needs the upstream bucketers (not wired into the court runner)
+tier2__court_p1_clf__single_agg__FS-ALL+S__xgboost,fit,tier2,tier2,court_p1_clf,single_agg,FS-ALL+S,xgboost,not run,not run: 8h budget and the 02:51–05:40 usage-limit pause (RD-25)
+tier2__court_p1_reg__single_agg__FS-ALL+S__xgboost,fit,tier2,tier2,court_p1_reg,single_agg,FS-ALL+S,xgboost,not run,not run: 8h budget and the 02:51–05:40 usage-limit pause (RD-25)

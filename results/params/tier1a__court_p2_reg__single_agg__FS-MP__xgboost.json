@@ -1,0 +1,20 @@
+{
+ "job_id": "tier1a__court_p2_reg__single_agg__FS-MP__xgboost",
+ "params": {
+  "best": {
+   "learning_rate": 0.05,
+   "subsample": 0.8,
+   "max_depth": 6,
+   "colsample_bytree": 0.8,
+   "min_child_weight": 1
+  }
+ },
+ "params_source": "default",
+ "max_prefix_len": 40,
+ "gap_train": 3,
+ "sample_frac": null,
+ "train_frac": null,
+ "n_features": [
+  651
+ ]
+}

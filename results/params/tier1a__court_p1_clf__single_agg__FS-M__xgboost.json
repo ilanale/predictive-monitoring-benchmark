@@ -1,0 +1,138 @@
+{
+ "job_id": "tier1a__court_p1_clf__single_agg__FS-M__xgboost",
+ "params": {
+  "job_id": "tune__court_p1_clf__single_agg__xgboost",
+  "tuned_fs": "FS-ALL",
+  "best": {
+   "colsample_bytree": 0.5501909469439642,
+   "learning_rate": 0.12980436614171276,
+   "max_depth": 4,
+   "min_child_weight": 5,
+   "subsample": 0.8341165782569435
+  },
+  "max_prefix_len": 26,
+  "gap": 3,
+  "n_train_segments": 20000,
+  "n_iter": 10,
+  "trials": [
+   {
+    "params": {
+     "colsample_bytree": 0.7863861359851854,
+     "learning_rate": 0.5458938131614443,
+     "max_depth": 8,
+     "min_child_weight": 3,
+     "subsample": 0.5741662782882488
+    },
+    "score": 0.8159922062598736,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.9614503207921081,
+     "learning_rate": 0.6068515711029745,
+     "max_depth": 19,
+     "min_child_weight": 6,
+     "subsample": 0.7001084093515878
+    },
+    "score": 0.8186957819184558,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.9356341502363872,
+     "learning_rate": 0.42374791285804947,
+     "max_depth": 5,
+     "min_child_weight": 2,
+     "subsample": 0.8939872047531972
+    },
+    "score": 0.8383093384153861,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.5555040705415355,
+     "learning_rate": 0.004388252261151582,
+     "max_depth": 28,
+     "min_child_weight": 2,
+     "subsample": 0.7282346960910877
+    },
+    "score": 0.8559688750976511,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.5501909469439642,
+     "learning_rate": 0.12980436614171276,
+     "max_depth": 4,
+     "min_child_weight": 5,
+     "subsample": 0.8341165782569435
+    },
+    "score": 0.8567894627254895,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.7391599025609829,
+     "learning_rate": 0.31921222522073356,
+     "max_depth": 27,
+     "min_child_weight": 4,
+     "subsample": 0.8339515070083019
+    },
+    "score": 0.8364877034836189,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.5228415199316319,
+     "learning_rate": 0.9380491581266746,
+     "max_depth": 24,
+     "min_child_weight": 4,
+     "subsample": 0.5800931264830945
+    },
+    "score": 0.7947119698380479,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.8058321871992171,
+     "learning_rate": 0.044780842684976396,
+     "max_depth": 17,
+     "min_child_weight": 3,
+     "subsample": 0.6010406145223199
+    },
+    "score": 0.8517383164992332,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.6850340289868952,
+     "learning_rate": 0.8229690502860139,
+     "max_depth": 26,
+     "min_child_weight": 5,
+     "subsample": 0.5626167933191006
+    },
+    "score": 0.7979268082892208,
+    "bucket_scores": {}
+   },
+   {
+    "params": {
+     "colsample_bytree": 0.5234714428172409,
+     "learning_rate": 0.2159714350250479,
+     "max_depth": 11,
+     "min_child_weight": 2,
+     "subsample": 0.8601667592465381
+    },
+    "score": 0.8437653141085409,
+    "bucket_scores": {}
+   }
+  ]
+ },
+ "params_source": "tuned:tune__court_p1_clf__single_agg__xgboost.json",
+ "max_prefix_len": 26,
+ "gap_train": 3,
+ "sample_frac": null,
+ "train_frac": null,
+ "n_features": [
+  192
+ ]
+}
