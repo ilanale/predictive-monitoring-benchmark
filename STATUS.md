@@ -15,7 +15,7 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 | G5 Tier 1 + Tier-2 cut-off | 08:04 | ✅ 07:54 (72 done of 74 queued; 2 timeouts; Tier 2 not run) |
 | Writing starts (latest) | 08:19 | |
 | G6 results | 09:34 | ✅ 08:07 (PASS, 0 open blockers; 1,691 numbers checked) |
-| Handoff | 09:49 | |
+| Handoff | 09:49 | ✅ 08:15 |
 
 ## Log (one line per milestone: time · who · what)
 - 02:04 · orchestrator · T0. Fork cloned, branch `court-adaptation`, upstream push disabled, `data/raw` symlinks.
@@ -37,3 +37,4 @@ Machine: Apple M5, 10 cores (4P+6E), 24 GB RAM (70% cap ≈ 16.8 GB), 267 GB fre
 - 07:54 · queue · Tier 1 finished: 36/36 Tier-1a and 26/28 queued Tier-1b fits done, 10 tunings; R1 prefix_agg FS-B0+G and FS-ALL timed out (RD-29). Generating final report.
 - 08:00 · orchestrator · Final results.md generated (8923c21, pushed). A4 running G6 (numbers vs raw files + DoD checklist), due 08:50. Handoff prep in parallel.
 - 08:07 · A4 · G6 PASS (f3c6fa4): 1,691 printed numbers match raw files; 100 bootstrap Δ rows reproduced; 52 tests OK; DoD-1..9 ✔ except DoD-5 partial (62/72 Tier-1 fits). Row-level audit cells found in history → RD-30.
+- 08:15 · orchestrator · Handoff: HANDOFF.md, zip (git archive) and git bundle in claude-run/deliverables/; court-adaptation pushed.
