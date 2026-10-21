@@ -1,0 +1,302 @@
+[
+ {
+  "row": "R3 single_agg FS-M",
+  "seed22": [
+   59.4,
+   145.1
+  ],
+  "other_seeds_lo_range": [
+   57.8,
+   61.3
+  ],
+  "other_seeds_hi_range": [
+   143.2,
+   146.1
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-M <=2016",
+  "seed22": [
+   2.5,
+   138.2
+  ],
+  "other_seeds_lo_range": [
+   -6.8,
+   5.2
+  ],
+  "other_seeds_hi_range": [
+   128.3,
+   135.5
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-MP",
+  "seed22": [
+   -27.0,
+   16.2
+  ],
+  "other_seeds_lo_range": [
+   -27.2,
+   -25.8
+  ],
+  "other_seeds_hi_range": [
+   14.3,
+   17.4
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-MP <=2016",
+  "seed22": [
+   -47.7,
+   35.6
+  ],
+  "other_seeds_lo_range": [
+   -46.4,
+   -42.7
+  ],
+  "other_seeds_hi_range": [
+   33.0,
+   35.2
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-B0+P",
+  "seed22": [
+   -21.5,
+   10.0
+  ],
+  "other_seeds_lo_range": [
+   -23.3,
+   -21.9
+  ],
+  "other_seeds_hi_range": [
+   8.1,
+   9.9
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-B0+P <=2016",
+  "seed22": [
+   -38.2,
+   25.6
+  ],
+  "other_seeds_lo_range": [
+   -37.9,
+   -34.1
+  ],
+  "other_seeds_hi_range": [
+   23.1,
+   24.6
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-B0+G",
+  "seed22": [
+   -40.6,
+   11.4
+  ],
+  "other_seeds_lo_range": [
+   -41.5,
+   -39.1
+  ],
+  "other_seeds_hi_range": [
+   8.2,
+   9.2
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-B0+G <=2016",
+  "seed22": [
+   -44.8,
+   46.7
+  ],
+  "other_seeds_lo_range": [
+   -45.6,
+   -40.7
+  ],
+  "other_seeds_hi_range": [
+   42.5,
+   46.4
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-ALL",
+  "seed22": [
+   -26.9,
+   29.4
+  ],
+  "other_seeds_lo_range": [
+   -27.0,
+   -24.7
+  ],
+  "other_seeds_hi_range": [
+   25.6,
+   28.3
+  ]
+ },
+ {
+  "row": "R3 single_agg FS-ALL <=2016",
+  "seed22": [
+   -31.5,
+   61.7
+  ],
+  "other_seeds_lo_range": [
+   -38.3,
+   -28.9
+  ],
+  "other_seeds_hi_range": [
+   60.1,
+   62.9
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-M",
+  "seed22": [
+   117.1,
+   199.3
+  ],
+  "other_seeds_lo_range": [
+   117.0,
+   119.0
+  ],
+  "other_seeds_hi_range": [
+   197.3,
+   201.5
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-M <=2016",
+  "seed22": [
+   56.2,
+   163.8
+  ],
+  "other_seeds_lo_range": [
+   51.6,
+   60.0
+  ],
+  "other_seeds_hi_range": [
+   156.7,
+   160.5
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-MP",
+  "seed22": [
+   6.9,
+   23.0
+  ],
+  "other_seeds_lo_range": [
+   6.6,
+   7.6
+  ],
+  "other_seeds_hi_range": [
+   23.3,
+   23.9
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-MP <=2016",
+  "seed22": [
+   -4.5,
+   27.3
+  ],
+  "other_seeds_lo_range": [
+   -4.6,
+   -2.8
+  ],
+  "other_seeds_hi_range": [
+   24.8,
+   27.0
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-B0+P",
+  "seed22": [
+   -3.1,
+   6.4
+  ],
+  "other_seeds_lo_range": [
+   -3.2,
+   -2.6
+  ],
+  "other_seeds_hi_range": [
+   6.4,
+   6.8
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-B0+P <=2016",
+  "seed22": [
+   -8.5,
+   8.3
+  ],
+  "other_seeds_lo_range": [
+   -8.8,
+   -7.5
+  ],
+  "other_seeds_hi_range": [
+   7.9,
+   8.7
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-B0+G",
+  "seed22": [
+   -25.0,
+   -3.8
+  ],
+  "other_seeds_lo_range": [
+   -26.3,
+   -24.7
+  ],
+  "other_seeds_hi_range": [
+   -4.3,
+   -3.4
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-B0+G <=2016",
+  "seed22": [
+   -21.3,
+   9.7
+  ],
+  "other_seeds_lo_range": [
+   -22.2,
+   -21.0
+  ],
+  "other_seeds_hi_range": [
+   11.3,
+   12.5
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-ALL",
+  "seed22": [
+   -22.6,
+   -1.8
+  ],
+  "other_seeds_lo_range": [
+   -23.9,
+   -21.9
+  ],
+  "other_seeds_hi_range": [
+   -2.1,
+   -1.1
+  ]
+ },
+ {
+  "row": "R3 prefix_agg FS-ALL <=2016",
+  "seed22": [
+   -18.2,
+   14.7
+  ],
+  "other_seeds_lo_range": [
+   -19.6,
+   -18.4
+  ],
+  "other_seeds_hi_range": [
+   15.1,
+   16.0
+  ]
+ }
+]

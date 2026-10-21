@@ -1,5 +1,91 @@
 # VERIFICATION
 
+## G6 — results & DoD (A4, 2026-10-21 08:07, code and results at `8923c21`)
+
+**Verdict: PASS, with 0 open blockers.**
+- Every number in `results.md` that I recomputed from the raw result files matches at its printed precision. That is 1,691 values.
+- The only differences are R3 bootstrap CI bounds, which differ by Monte-Carlo noise from my independent seed. I reproduced them exactly when I replayed the report's seed-22 resampling with my own kernel.
+- DoD-1 to DoD-4 and DoD-6 to DoD-9 are met. DoD-5 is partly met: Tier 1 is incomplete by logged budget decisions. DoD-10 is pending with the orchestrator.
+
+| # | Open blockers |
+|---|---|
+| – | none |
+
+### 1. Numbers check — PASS
+
+**How I checked**
+- Scripts: `verification/g6_numbers_check.py` (output `verification/g6_results.json`) and `verification/g6_bootstrap_seed_check.py` (output `verification/g6_bootstrap_seed_check.json`).
+- My code does not use `court/report.py` or `court/evaluate.py`:
+  - metrics come from sklearn applied to the saved predictions;
+  - the split, the training prefixes (gap 3, L) and the prefix-end dates are rebuilt with pandas from the parquet logs;
+  - the paired bootstrap resamples whole segments using multinomial integer weights, my own weighted-AUC and MAE kernel, and seed 20261021.
+- Each printed value is compared with the recomputed one at half a unit of its printed precision.
+
+**Results**
+
+- **Prediction files (62):** each file's (segment_id, prefix_len) rows equal the rebuilt test prefixes, with 0 unmatched rows. y_true equals the raw label or `remaining_in_phase`, with 0 mismatches across 8,979,804 rows.
+- **RQ1 table (section 4):** all AUC, F1@0.5, PR-AUC and test-prefix counts of the 62 finished configurations match, both against the predictions and against `runs.csv`. The 8 "not run" rows have no prediction file.
+- **RQ2 table (section 5):** MAE, MedAE, R² (log), n and both baseline columns match the predictions, the `runs.csv` values and my own C13 rebuild.
+- **C13 baselines.** My rebuilt values match the consistency table in section 5:
+
+| Task | Train median (days) | Baseline MAE, overall median | Baseline MAE, per-length median | L |
+|---|---|---|---|---|
+| R1 | 106 | 156.31 | 155.97 | 25 |
+| R2 | 321 | 257.49 | 256.83 | 40 |
+| R3 | 491 | 294.31 | 297.14 | 40 |
+
+- **Bootstrap Δ (section 6 and the Δ columns of 8.1):** I recomputed all 50 Δ rows on all test prefixes and all 50 restricted Δ rows (100 CIs in total).
+  - All 100 point estimates match exactly.
+  - Every T and R1/R2 CI is within ±0.005 AUC or ±1 day.
+  - The six FS-B0+G − FS-B0 single_agg rows, printed vs mine:
+
+| Task | All prefixes, printed | All prefixes, mine | ≤ 2016, printed | ≤ 2016, mine |
+|---|---|---|---|---|
+| T1 | −0.011 [−0.014, −0.008] | −0.0112 [−0.0143, −0.0080] | −0.008 [−0.011, −0.005] | −0.0079 [−0.0109, −0.0047] |
+| R1 | 4.0 [3.5, 4.5] | 3.99 [3.51, 4.53] | 4.4 [3.8, 5.0] | 4.43 [3.91, 4.98] |
+| T2 | −0.031 [−0.051, −0.010] | −0.0315 [−0.0507, −0.0088] | −0.020 [−0.042, 0.001] | −0.0203 [−0.0408, 0.0013] |
+| R2 | −4.5 [−6.7, −2.6] | −4.53 [−6.38, −2.32] | −2.6 [−4.6, −0.6] | −2.59 [−4.77, −0.43] |
+| T3 | −0.004 [−0.015, 0.007] | −0.0037 [−0.0150, 0.0073] | 0.002 [−0.017, 0.020] | 0.0023 [−0.0159, 0.0195] |
+| R3 | −14.1 [−40.6, 11.4] | −14.10 [−40.88, 10.60] | 5.5 [−44.8, 46.7] | 5.45 [−47.03, 42.46] |
+
+- **R3 CIs: 23 bounds outside ±1 day, and this is Monte-Carlo noise.** R3 has only 497 test segments, and its MAE differences reach hundreds of days.
+  - With my own kernel and the report's draw sequence (`default_rng(22)`, one `integers(0, n_seg, n_seg)` per resample), all 20 R3 CI pairs are reproduced exactly.
+  - Across 5 other seeds the bounds move by up to 12 days (`g6_bootstrap_seed_check.json`).
+  - So ±1 day cannot be reached for R3 with an independent seed. The report's numbers are correct for its stated seed.
+- **Section 8.1, restricted to prefix-end date ≤ 2016-12-31:** the kept/all counts match. Examples: T1 221,123/248,411; R1 219,483/245,924; T2/R2 118,158/201,322; T3/R3 5,426/13,270. Every restricted metric also matches.
+- **Summary bullets:**
+  - Job counts: 62/72 fits, 10/12 tunings, 3 failed or timed out, 8 not run.
+  - Best configurations and values: T1 FS-MP single_agg 0.825; T2 FS-B0 prefix_agg 0.808; R1 FS-B0+P single_agg 144.3; R2 FS-ALL single_agg 220.3. The same-method FS-B0 values and the baselines also match.
+  - Both sets of RQ3 Δ bullets match.
+- **Section 2:** every cleaning count, input size, line count and MD5 equals `data/processed/data_report.json`. Segments, trace rows, in-phase rows, label rate and in-phase length q50/q90/q90-positives also equal my recomputation from the parquet files, for all three phases.
+- **Also matching:** the drift-by-filing-year table in section 8 (metrics and test segments per year) and the importance-by-view shares in section 6 (against `results/importance/*.csv`).
+
+### 2. DoD checklist (PLAN.md §7)
+
+| DoD | Status | Evidence / what is missing |
+|---|---|---|
+| 1 Fork, history, compat then research, notices, CHANGES | ✔ | Upstream history is kept (`0075f55` … `1047d6a`). There is one `compat:` commit (`2212f02`), followed by research commits; `court-adaptation` exists locally and on origin. All 14 modified upstream files carry the notice on line 1, and the one new upstream-tree file (`transformers/LastValueOfColsTransformer.py`) has an "Added by" header. All 15 files are listed in `CHANGES_FROM_UPSTREAM.md`. Bootstrap `chore:` commits for the plan and docs come before `compat:`; they contain no code. |
+| 2 One command, resumable | ✔ | `python -m court.run --help` works (`--config`, `--skip-data`, `--tier`, `--sample-frac`). Resume is covered by `test_queue_order_and_resume` and `test_queue_runs_subprocess_and_skips_done`. I did not run a full rebuild from raw inputs in G6. |
+| 3 Test suite | ✔ | `PYTHONPATH=$PWD:$PWD/experiments python -m unittest discover -s tests -t .` → **Ran 52 tests in 46.6 s, OK**. The tests cover every required item: fast path = upstream (`test_fast_pipeline`, `test_verify_fast_path`), D7 perturbation (`test_perturb_future_events`, `test_D7_perturb_future`), excluded columns (`test_never_in_any_matrix`, `test_outcome_column_rejected`), D1–D4/D6 hand-built cases, regression labels (`test_regression_label`, `test_label_is_remaining_of_last_event`), split (`test_strict_split`), and G brute force (`test_global_matches_brute_force`). |
+| 4 Upstream behaviour preserved | ✔ | `tests/test_compat_smoke.py` passes 3/3: identical features, predictions and AUC to `compat:` on the synthetic log. `test_n_hist_zero_equals_original_prefix_generation` also passes. P4 data was not provided, so there is no real-log check. |
+| 5 All Tier-1 runs finished | **partly met** | 62 of 72 Tier-1 fits are done, and each has predictions (62 files), a params file (62), runtime and a `runs.csv` row. **Missing:** 8 fits cut by RD-28 (T2 and R2 prefix_agg: FS-M, FS-MP, FS-B0+P, FS-B0+G); 2 timeouts after halving (R1 prefix_agg FS-B0+G and FS-ALL, RD-29); and the R2 prefix_agg tuning, which was not run. **Degraded:** the R2 single_agg tuning timed out, so all 8 R2 fits use default XGBoost params (RD-24, RD-28), and the R1 tunings ran on half the sample. |
+| 6 Per-task outputs | ✔ (for the configurations that ran) | For all 6 tasks: overall metrics, per-prefix curves (`results/figures/{auc,mae}_by_prefix_*.png`, `tables/*__by_prefix.csv`), paired-bootstrap Δ against FS-B0, importance by view, and C13 baselines. Phase-2 prefix_agg has only FS-B0 and FS-ALL (RD-28). |
+| 7 `results.md` generated, in order | ✔ | Generated by `python -m court.report`. Sections 1–11 follow the DoD order. The summary has 8 bullets. Every number checks out (Part 1 above). Tier 2 is reported as "not run: reason". |
+| 8 README | ✔ | It covers every item: what the repo is plus the citation; quick start; environment with the pip → GitHub source → fallback chain; data location and formats with "No data is committed"; the repo tree (every tracked file or its directory is named); stages run separately and together; config reference; adding a feature set or task; outputs; how upstream behaviour was preserved; troubleshooting (memory, time caps); license. |
+| 9 Other files | ✔ | `DECISIONS.md` holds D1–D12 only (12 `## D` headings). `RUN_DECISIONS.md` holds RD-01…RD-29. Also present: `data/processed/data_report.md` (copy in `docs/`), `PLAN.md`, and `VERIFICATION.md` with G6 at 0 open blockers. |
+| 10 Push, zip, HANDOFF | pending orchestrator | — |
+
+**No row-level data in git.** `git ls-files` contains no event-log or processed data: `data/` holds only `data/README.md`, and the predictions are git-ignored. One exception was A4's own G2 audit samples, `verification/g2_feature_cells.csv` and `verification/g2_feature_cells_targeted.csv`. They hold 800 sampled feature cells (segment_id, date, column, value).
+- In this commit I untracked them (`git rm --cached`) and git-ignored them. They are still on disk.
+- **For the orchestrator:** they remain in history and were already pushed to `origin/court-adaptation`. If the no-data rule must hold for history too, rewrite before the final push. Otherwise build the DoD-10 zip with `git archive` (HEAD), so they are left out.
+- `verification/g2_results.json` mentions 6 segment ids as examples. These are public docket numbers, so I left them.
+
+### Non-blocking concerns
+1. **The significance star on one restricted R3 row depends on the seed.** Section 8.1, R3 single_agg FS-M ≤ 2016 is printed as `64.1* [2.5, 138.2]`. Across seeds the lower bound ranges from −6.8 to 5.2. All R3 CIs carry this ±5–12-day Monte-Carlo noise. Read R3 stars near 0 as borderline, or use n_boot = 5,000 next time.
+2. **The runtime table (section 9) has a blank tier row** ("| | 1 | 20.0 |"). It is the timed-out `tune__court_p2_reg__single_agg` row, whose `runs.csv` entry has empty tier, task, method and fs fields. It should count under `tune` (11 jobs, 133.8 min). This is cosmetic.
+3. **Tier 2 is not run.** 38 tier-2 fits and 19 tunings: the state, cluster and laststate bucketings are not wired into the court runner, and the FS-B0 re-tune, D1 and D8 sensitivity runs, and RF were not run because of the budget (RD-25). Tier 2 is "should" and outside the DoD; results.md reports it as not run, with reasons.
+4. **Carried over from G4:** the G-feature drift and the censoring artifact (RD-26 restricted evaluation added); tuning CV with random folds (RD-27); hyperparameters tuned on FS-ALL and reused.
+
 ## G4 — leakage & code review (A4, 2026-10-21, code at `938480c`)
 
 **Verdict: PASS.** No blockers. I found no leakage path in the pipeline and no misalignment of targets or predictions. Both patterns the builder raised are explained by the data, not by a code bug (see Check 9).

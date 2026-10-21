@@ -99,3 +99,6 @@ results/queue.log
 # court-adaptation: row-level caches written by court/report.py (segment ids = case ids)
 results/tables/segment_filing_year__*
 results/tables/prefix_end_date__*
+
+# A4 audit samples with row-level cells (no data in git)
+verification/g2_feature_cells*.csv
