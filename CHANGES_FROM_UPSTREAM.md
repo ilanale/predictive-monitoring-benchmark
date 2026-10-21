@@ -90,3 +90,40 @@ in-phase prefix generation with `n_hist = 0` equals the original one).
 | `experiments/experiments.py`, `experiments/optimize_params.py` | encoders: `agg` + `lastG` when the FS has G columns; `static` only for FS-M (no dynamic columns) | C8, FS-M |
 | `experiments/EncoderFactory.py`, new `transformers/LastValueOfColsTransformer.py` | method `lastG`: last non-null value of the G columns, named `last_<col>`, `fillna(0)` | C8 |
 | new `court/fast_pipeline.py` (+ `court/verify_fast_path.py`) | prefix features without materialising the prefix log; bit-identical to the adapted upstream path (running Kahan sums and FMA-Welford reproduce pandas' cython groupby mean/sum/std); identical XGBoost predictions on 1,000-segment samples of all six tasks | C9 |
+
+## research — C10–C13 and the court-only modules (no upstream file changed)
+
+| File | What | Why (PLAN.md) |
+|---|---|---|
+| `court/runner.py` | per job: `predictions/<job>.csv.gz` (`segment_id, prefix_len, y_true, y_pred`), `params/<job>.json`, per-prefix table, a `runs.csv` row | C10: every reported number can be recomputed |
+| `court/evaluate.py` | `paired_bootstrap`: Δ(FS_x − FS-B0) with a 95% percentile CI, 1,000 resamples of test segments | C11 |
+| `court/evaluate.py`, `court/runner.py` | `importance_by_view`: XGBoost total gain summed per view (M / P / P+ / G / G+ / S) for each final model | C12 |
+| `court/evaluate.py`, `court/runner.py` | `regression_baselines`: training median of remaining days, overall and per in-phase prefix length | C13 |
+| `court/report.py` | builds `results.md`, `results/figures/`, `results/tables/` from `results/` only; vectorised paired bootstrap (same resamples as `evaluate.paired_bootstrap`, checked in `tests/test_report.py`), cached; C13 per-length curves rebuilt from `data/processed` and checked against `runs.csv`; drift check and RD-26 restricted evaluation | DoD-7 |
+| `court/run_queue.py`, `court/run.py`, `court/tune.py`, `court/data_io.py`, `court/fast_pipeline.py`, `court/feature_sets.py`, `court/court_confs.py`, `court/upstream.py`, `court/verify_fast_path.py`, `court/data_prep/*` | new modules: queue with time caps, single entry point, TPE tuning, split/L, fast path, feature sets, task registration, data build | DoD-2, C1, C7, C9, WS1 |
+
+## Index: every changed upstream file
+
+Checked against `git diff 1047d6a..HEAD --stat -- experiments transformers bucketers` (15 files: 14 modified, 1 new).
+Files in those directories that are not listed here are unchanged.
+
+| Upstream file | compat | test | research |
+|---|---|---|---|
+| `bucketers/NoBucketer.py` | `np.int` → `int` | – | – |
+| `bucketers/PrefixLengthBucketer.py` | `.as_matrix()` → `.to_numpy()` | – | C6: bucket by `prefix_nr` (in-phase length) when `n_hist` and `prefix_nr` are present |
+| `bucketers/StateBasedBucketer.py` | `.as_matrix()` → `.to_numpy()` | – | – |
+| `experiments/BucketFactory.py` | lazy `KNNBucketer` import; `KMeans(n_init=10)` | – | – |
+| `experiments/DatasetManager.py` | – | – | C1 task type and court columns; C2 per-prefix regression label; C5 fallbacks and `KFold`; C6 in-phase prefixes; C7 in-phase length quantile; court `split_data_strict` |
+| `experiments/EncoderFactory.py` | – | – | C8: `lastG` method, `global_cols` argument |
+| `experiments/dataset_confs.py` | `logs_dir` from `PPM_LOGS_DIR` | dataset `synthetic` | C1: court tasks registered via `court_confs` when `PPM_COURT_DATA_DIR` is set |
+| `experiments/experiments.py` | `random_state` (was `seed`), `n_jobs` from `PPM_N_JOBS`, `solver="liblinear"` | – | C3 regressors; C4 MAE rows; C8 `agg+lastG`; FS-M static-only |
+| `experiments/optimize_params.py` | same as `experiments.py` | – | C3 regressors; C4 score = −MAE; C8 `agg+lastG`; FS-M static-only |
+| `transformers/AggregateTransformer.py` | named aggregation; `get_dummies(dtype=np.uint8)` | – | – |
+| `transformers/IndexBasedTransformer.py` | `max_events` and case-id frame without `apply`; `uint8` dummies | – | – |
+| `transformers/LastStateTransformer.py` | `uint8` dummies | – | – |
+| `transformers/LastValueOfColsTransformer.py` (new) | – | – | C8: last non-null value of the G columns |
+| `transformers/PreviousStateTransformer.py` | `nth(-2)` + `set_index`; `uint8` dummies | – | – |
+| `transformers/StaticTransformer.py` | `uint8` dummies | – | – |
+
+Each change is explained, with its reason, in the compat, test and research sections above. `README.md` was
+rewritten for this project; the upstream README is kept unchanged as `docs/UPSTREAM_README.md`.

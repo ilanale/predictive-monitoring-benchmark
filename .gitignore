@@ -95,3 +95,7 @@ results/predictions/
 results/queue.log
 .venv/
 .DS_Store
+
+# court-adaptation: row-level caches written by court/report.py (segment ids = case ids)
+results/tables/segment_filing_year__*
+results/tables/prefix_end_date__*

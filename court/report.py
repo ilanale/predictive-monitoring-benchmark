@@ -517,8 +517,11 @@ def plot_drift(drift, fig_dir, name="drift_by_filing_year.png", xlabel="filing y
         return None
     plt = _plt()
     tasks = list(dict.fromkeys(drift["task"]))
-    fig, axes = plt.subplots(1, len(tasks), figsize=(3.4 * len(tasks), 3.0), squeeze=False)
-    for ax, task in zip(axes[0], tasks):
+    nc = min(3, len(tasks)); nr = int(np.ceil(len(tasks) / nc))
+    fig, axes = plt.subplots(nr, nc, figsize=(3.8 * nc, 3.0 * nr), squeeze=False)
+    for ax in axes.flat[len(tasks):]:
+        ax.set_visible(False)
+    for ax, task in zip(axes.flat, tasks):
         d = drift[drift["task"] == task]
         metric = "auc" if task_type_of(task) == "classification" else "mae"
         for fs in [f for f in FS_ORDER if f in set(d["fs"])]:
@@ -526,7 +529,7 @@ def plot_drift(drift, fig_dir, name="drift_by_filing_year.png", xlabel="filing y
             ax.plot(e["filing_year"], e[metric], marker="o", ms=3, label=fs, color=FS_COLORS.get(fs))
         ax.set_title("%s — %s" % (TASK_NAMES.get(task, task), metric.upper()))
         ax.set_xlabel(xlabel)
-    axes[0][-1].legend(fontsize=7)
+    axes.flat[len(tasks) - 1].legend(fontsize=7)
     fig.tight_layout()
     path = os.path.join(fig_dir, name)
     fig.savefig(path); plt.close(fig)
@@ -1101,14 +1104,20 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
     t2 = status[status["queue_tier"] == "tier2"]
     if len(t2):
         t2r = t2.merge(runs[["job_id", "auc", "mae"]], on="job_id", how="left")
+        ran = t2r[~t2r["status"].isin(["not run"])]
         rows = []
-        for _, r in t2r.iterrows():
+        for _, r in ran.iterrows():
             res = ("AUC %s" % fmt(r["auc"]) if task_type_of(r["task"]) == "classification" else
                    "MAE %s" % fmt(r["mae"], 1)) if r["status"] == "done" else "–"
             rows.append(dict(job=r["job_id"], status=r["status"], reason=(r["reason"] or "").replace("|", "/"),
                              result=res))
-        sec += ["Tier 2 (queue state at report time):", "", md_table(pd.DataFrame(rows), headers=[
-            "Job", "Status", "Reason / flags", "Result"]), ""]
+        if rows:
+            sec += ["Tier 2 jobs that ran or are running:", "", md_table(pd.DataFrame(rows), headers=[
+                "Job", "Status", "Reason / flags", "Result"]), ""]
+        for reason, g in t2r[t2r["status"] == "not run"].groupby("reason"):
+            sec.append("- Not run: %s — %d job(s): %s." % (reason, len(g), ", ".join(
+                "`%s`" % j for j in g["job_id"].head(6)) + (", …" if len(g) > 6 else "")))
+        sec.append("")
     else:
         sec.append("Tier 2: not configured.")
     sec += ["Tier 3: the drift check is in section 8. Logistic/linear regression learners: not run — not part of "
@@ -1207,8 +1216,10 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
         items.append("%d job(s) not run (%s), e.g. `%s`." % (len(g), reason, g["job_id"].iloc[0]))
     items.append("The upstream port was validated on a synthetic log only (P4 skipped: the paper's datasets were "
                  "not provided), so there is no published-AUC reproduction check.")
-    for l in g_drift_lines(gdrift, top=2):
-        items.append("G drift (VERIFICATION.md G4): " + l)
+    if gdrift:
+        items.append("G drift (VERIFICATION.md G4; details in section 6): " + "; ".join(
+            "phase %d: %d of %d global columns shift by more than 1 SD between train and test in-phase rows" % (
+                ph, int((sm["smd"].abs() > 1).sum()), len(sm)) for ph, (sm, _) in sorted(gdrift.items())) + ".")
     if gdrift:
         items.append("The global (G/G+) features are non-stationary and partly a data artifact (closed-cases-only "
                      "case table, judge-level break in 2016); RQ3 G conclusions should be read as 'G under temporal "
