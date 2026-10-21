@@ -38,6 +38,7 @@ BASE_FS = "FS-B0"
 VIEWS = ["M", "P", "P+", "G", "G+", "S"]
 TASK_NAMES = {"court_p1_clf": "T1", "court_p2_clf": "T2", "court_p3_clf": "T3",
               "court_p1_reg": "R1", "court_p2_reg": "R2", "court_p3_reg": "R3"}
+RESTRICT_END = "2016-12-31"  # RD-26: = end of the D5 filing window; later court counts are censored
 PHASE2_REASON = "method needs the upstream bucketers (not wired into the court runner)"
 
 
@@ -246,8 +247,10 @@ def fast_paired_bootstrap(pred_x, pred_base, task_type, n_boot=evaluate.N_BOOT, 
     return {"metric": metric, "delta": point, "ci_low": lo_, "ci_high": hi_, "n_boot": n_boot, "n_segments": S}
 
 
-def bootstrap_table(runs, results_dir, n_boot=evaluate.N_BOOT, enabled=True):
-    path = os.path.join(results_dir, "tables", "bootstrap_delta_vs_%s.csv" % BASE_FS)
+def bootstrap_table(runs, results_dir, n_boot=evaluate.N_BOOT, enabled=True, restrict=None, tag=""):
+    """Δ vs FS-B0 for every finished fit. ``restrict(task, pred) -> pred`` filters the test prefixes
+    (RD-26); ``tag`` names the cache file and enters the cache signature."""
+    path = os.path.join(results_dir, "tables", "bootstrap_delta_vs_%s%s.csv" % (BASE_FS, tag))
     cache = pd.read_csv(path, dtype={"sig": str}) if os.path.exists(path) else pd.DataFrame()
     done = runs[(runs["status"] == "done") & ~runs["job_id"].str.startswith("tune__")]
     rows = []
@@ -262,15 +265,19 @@ def bootstrap_table(runs, results_dir, n_boot=evaluate.N_BOOT, enabled=True):
             px, pb = pred_path(results_dir, jid), pred_path(results_dir, base_id)
             if not (os.path.exists(px) and os.path.exists(pb)):
                 continue
-            sig = "%s|%s|%d|%d" % (file_sig(px), file_sig(pb), n_boot, evaluate.BOOT_SEED)
+            sig = "%s|%s|%d|%d|%s" % (file_sig(px), file_sig(pb), n_boot, evaluate.BOOT_SEED, tag)
             hit = cache[(cache["job_id"] == jid) & (cache["sig"] == sig)] if len(cache) else cache
             if len(hit):
                 rows.append(hit.iloc[0].to_dict()); continue
             if not enabled:
                 continue
             t0 = time.time()
-            r = fast_paired_bootstrap(load_pred(results_dir, jid), load_pred(results_dir, base_id),
-                                      task_type_of(task), n_boot=n_boot)
+            a, b = load_pred(results_dir, jid), load_pred(results_dir, base_id)
+            if restrict is not None:
+                a, b = restrict(task, a), restrict(task, b)
+                if a is None or b is None or not len(a):
+                    continue
+            r = fast_paired_bootstrap(a, b, task_type_of(task), n_boot=n_boot)
             r.update(job_id=jid, base_job_id=base_id, tier=tier, task=task, method=method, fs=fs,
                      learner=learner, sig=sig, seconds=round(time.time() - t0, 2))
             rows.append(r)
@@ -305,6 +312,79 @@ def segment_years(results_dir, data_dir, phase):
     os.makedirs(os.path.dirname(cache), exist_ok=True)
     s.reset_index().to_csv(cache, index=False)
     return s
+
+
+def prefix_end_dates(results_dir, data_dir, phase, test_segments):
+    """(segment_id, prefix_len = in-phase j) → date of the prefix-end event (RD-26).
+
+    The phase files are sorted by (date, original row order) within contiguous segments; the
+    prefix with in-phase length j ends at 0-based position ``n_hist + j − 1`` of its segment
+    (``fast_pipeline.prefix_ends``: ``rows = start + h + j − 1``). The runner re-sorts same-day
+    events by activity (RD-22), which does not change the date at a position. Cached in tables/."""
+    cache = os.path.join(results_dir, "tables", "prefix_end_date__p%d.csv.gz" % phase)
+    if os.path.exists(cache):
+        d = pd.read_csv(cache, parse_dates=["end_date"])
+        if set(test_segments) <= set(d["segment_id"]):
+            return d
+    if not data_dir:
+        return None
+    df = _phase_frame(data_dir, phase, ["segment_id", "timestamp", "n_hist"])
+    if df is None:
+        return None
+    df = df[df["segment_id"].isin(set(test_segments))]
+    ts = pd.to_datetime(df["timestamp"])
+    seg = df["segment_id"]
+    if (seg != seg.shift()).sum() != seg.nunique() or not \
+            ((ts.diff().dt.days.fillna(0) >= 0) | (seg != seg.shift())).all():
+        raise ValueError("phase %d file is not sorted by date within contiguous segments" % phase)
+    pos = df.groupby("segment_id", sort=False).cumcount().to_numpy()
+    j = pos - df["n_hist"].to_numpy() + 1
+    out = pd.DataFrame({"segment_id": seg.to_numpy(), "prefix_len": j, "end_date": ts.to_numpy()})[j >= 1]
+    os.makedirs(os.path.dirname(cache), exist_ok=True)
+    out.to_csv(cache, index=False)
+    return out
+
+
+def g_drift_stats(results_dir, data_dir, phase, cols_json):
+    """Train-vs-test shift of the global columns (open_cases + G_*) on in-phase rows, and their yearly
+    means (VERIFICATION.md G4, Check 9.3; RD-26). Uses the runner's split (``data_io.split_data_strict``)."""
+    c_smd = os.path.join(results_dir, "tables", "g_drift_smd__p%d.csv" % phase)
+    c_yr = os.path.join(results_dir, "tables", "g_drift_yearly__p%d.csv" % phase)
+    if os.path.exists(c_smd) and os.path.exists(c_yr):
+        return pd.read_csv(c_smd), pd.read_csv(c_yr)
+    if not data_dir or not cols_json:
+        return None, None
+    from court import data_io
+    gcols = list(cols_json["views"].get("B0G", [])) + list(cols_json["views"].get("G", []))
+    df = _phase_frame(data_dir, phase, ["segment_id", "Activity", "timestamp", "in_phase"])
+    if df is None:
+        return None, None
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    train, test, split_ts = data_io.split_data_strict(df)
+    tr_idx = train.index[train["in_phase"] == 1]
+    te_idx = test.index[test["in_phase"] == 1]
+    year = df["timestamp"].dt.year.to_numpy()
+    in_ph = (df["in_phase"] == 1).to_numpy()
+    del train, test
+    G = _phase_frame(data_dir, phase, gcols)
+    rows, yr = [], {}
+    for c in gcols:
+        v = G[c].to_numpy(dtype=np.float64)
+        a, b = v[tr_idx], v[te_idx]
+        sd = a.std(ddof=1)
+        rows.append(dict(column=c, train_mean=a.mean(), train_sd=sd, test_mean=b.mean(),
+                         smd=(b.mean() - a.mean()) / sd if sd > 0 else np.nan,
+                         share_above_train_max=float((b > a.max()).mean()),
+                         share_below_train_min=float((b < a.min()).mean())))
+        yr[c] = pd.Series(v[in_ph]).groupby(year[in_ph]).mean()
+    smd = pd.DataFrame(rows)
+    smd["split_ts"] = str(split_ts)
+    smd["n_train_rows"], smd["n_test_rows"] = len(tr_idx), len(te_idx)
+    yearly = pd.DataFrame(yr)
+    yearly.index.name = "year"
+    yearly = yearly.reset_index()
+    smd.to_csv(c_smd, index=False); yearly.to_csv(c_yr, index=False)
+    return smd, yearly
 
 
 def baseline_by_prefix(results_dir, data_dir, task, max_len, gap_train, ref_overall=None):
@@ -432,7 +512,7 @@ def plot_importance(imp, fig_dir):
     return path
 
 
-def plot_drift(drift, fig_dir):
+def plot_drift(drift, fig_dir, name="drift_by_filing_year.png", xlabel="filing year"):
     if not len(drift):
         return None
     plt = _plt()
@@ -445,10 +525,10 @@ def plot_drift(drift, fig_dir):
             e = d[d["fs"] == fs].sort_values("filing_year")
             ax.plot(e["filing_year"], e[metric], marker="o", ms=3, label=fs, color=FS_COLORS.get(fs))
         ax.set_title("%s — %s" % (TASK_NAMES.get(task, task), metric.upper()))
-        ax.set_xlabel("filing year")
+        ax.set_xlabel(xlabel)
     axes[0][-1].legend(fontsize=7)
     fig.tight_layout()
-    path = os.path.join(fig_dir, "drift_by_filing_year.png")
+    path = os.path.join(fig_dir, name)
     fig.savefig(path); plt.close(fig)
     return path
 
@@ -479,6 +559,38 @@ def read_text(path):
         with open(path) as f:
             return f.read()
     return ""
+
+
+def g_drift_lines(gdrift, top=3):
+    """Sentence templates for the G drift evidence (VERIFICATION.md G4 Check 9.3), from g_drift_stats."""
+    lines = []
+    for ph, (smd, yearly) in sorted(gdrift.items()):
+        d = smd.dropna(subset=["smd"]).reindex(smd["smd"].abs().sort_values(ascending=False).index).head(top)
+        parts = ["`%s` %s SD (%s of test values above / %s below the train range)" % (
+            r["column"], ("+" if r["smd"] > 0 else "") + fmt(r["smd"], 1), "{:.0%}".format(r["share_above_train_max"]),
+            "{:.0%}".format(r["share_below_train_min"])) for _, r in d.iterrows()]
+        oc = smd[smd["column"] == "open_cases"]
+        if len(oc) and "open_cases" not in set(d["column"]):
+            r = oc.iloc[0]
+            parts.append("`open_cases` %s SD (%s above the train max)" % (
+                ("+" if r["smd"] > 0 else "") + fmt(r["smd"], 1), "{:.0%}".format(r["share_above_train_max"])))
+        lines.append("Phase %d, test vs. train in-phase rows (split at %s): largest standardised mean differences "
+                     "%s; %d of %d global columns shift by more than 1 SD." % (
+                         ph, str(smd["split_ts"].iloc[0])[:10], "; ".join(parts), int((smd["smd"].abs() > 1).sum()),
+                         len(smd)))
+        y = yearly.set_index("year")
+        if "open_cases" in y.columns and len(y):
+            pk = y["open_cases"].idxmax()
+            lines.append("Phase %d, yearly mean of `open_cases` (court-wide): peaks at %s in %d and falls to %s in %d "
+                         "(right-censoring: the case table holds only closed cases)." % (
+                             ph, fmt(y.loc[pk, "open_cases"], 0), pk, fmt(y["open_cases"].iloc[-1], 0), y.index[-1]))
+        jc = [c for c in ("G_judge_filed_last30", "G_judge_open_phase%d" % ph, "G_judge_open") if c in y.columns]
+        if 2015 in y.index and 2016 in y.index and jc:
+            lines.append("Phase %d, judge-level counts 2015 → 2016 (yearly means): %s." % (ph, "; ".join(
+                "`%s` %s → %s (×%s)" % (c, fmt(y.loc[2015, c], 1), fmt(y.loc[2016, c], 1),
+                                       fmt(y.loc[2016, c] / y.loc[2015, c], 2) if y.loc[2015, c] else "–")
+                for c in jc)))
+    return lines
 
 
 # ----------------------------------------------------------------------------- main build
@@ -600,6 +712,102 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
         notes.append("drift check: no filing_year source (data/processed or cached tables) or no tier1a predictions")
     fig_drift = plot_drift(drift, fig_dir)
 
+    # ---- RD-26: evaluation restricted to test prefixes ending <= RESTRICT_END; metrics by prefix-end year
+    end_dates = {}
+    for ph in sorted({phase_of(t) for t in done_fits["task"]}):
+        jids = done_fits[done_fits["task"].map(phase_of) == ph]["job_id"]
+        segs = set()
+        for jid in jids:
+            p = load_pred(results_dir, jid)
+            if p is not None:
+                segs |= set(p["segment_id"].unique())
+        try:
+            end_dates[ph] = prefix_end_dates(results_dir, data_dir, ph, segs)
+        except Exception as e:
+            end_dates[ph] = None; notes.append("prefix-end dates for phase %d: %s" % (ph, e))
+        if end_dates[ph] is None:
+            notes.append("restricted evaluation (RD-26), phase %d: no prefix-end dates (data/processed missing)" % ph)
+
+    _restrict_cache = {}
+
+    def with_end(task, pred):
+        key = id(pred)
+        if key not in _restrict_cache:
+            ed = end_dates.get(phase_of(task))
+            _restrict_cache[key] = None if ed is None or pred is None else pred.merge(
+                ed, on=["segment_id", "prefix_len"], how="left")
+        return _restrict_cache[key]
+
+    def restrict(task, pred):
+        m = with_end(task, pred)
+        if m is None:
+            return None
+        if m["end_date"].isna().any():
+            raise ValueError("prefix-end date missing for %d rows of %s" % (m["end_date"].isna().sum(), task))
+        return m[m["end_date"] <= pd.Timestamp(RESTRICT_END)].drop(columns="end_date")
+
+    restr_rows = []
+    for _, r in done_fits.iterrows():
+        pred = load_pred(results_dir, r["job_id"])
+        rp = restrict(r["task"], pred) if pred is not None else None
+        if rp is None:
+            continue
+        tt = task_type_of(r["task"])
+        mt = evaluate.overall_metrics(rp, tt)
+        restr_rows.append(dict(job_id=r["job_id"], tier=r["tier"], task=r["task"], method=r["method"], fs=r["fs"],
+                               metric=evaluate.primary_metric(tt), all=r[evaluate.primary_metric(tt)],
+                               restricted=mt[evaluate.primary_metric(tt)], n_all=len(pred), n_restricted=len(rp),
+                               n_seg_restricted=rp["segment_id"].nunique()))
+    restr = pd.DataFrame(restr_rows)
+    if len(restr):
+        restr.to_csv(os.path.join(tab_dir, "restricted_le_%s.csv" % RESTRICT_END[:4]), index=False)
+    boot_r = bootstrap_table(runs, results_dir, n_boot=n_boot, enabled=do_bootstrap, restrict=restrict,
+                             tag="__restricted_le%s" % RESTRICT_END[:4]) if len(restr) else pd.DataFrame()
+    endyr_rows = []
+    for task in cfg["tasks"]:
+        for fs in drift_fs:
+            jid = runner.make_job_id("tier1a", task, "single_agg", fs, "xgboost")
+            if jid not in set(done_fits["job_id"]):
+                continue
+            m = with_end(task, load_pred(results_dir, jid))
+            if m is None:
+                continue
+            yrs = m["end_date"].dt.year
+            f = evaluate.clf_metrics if task_type_of(task) == "classification" else evaluate.reg_metrics
+            for y, g in m.groupby(yrs):
+                e = f(g["y_true"], g["y_pred"]); e.update(task=task, fs=fs, end_year=int(y), job_id=jid)
+                endyr_rows.append(e)
+    endyr = pd.DataFrame(endyr_rows)
+    fig_endyr = None
+    if len(endyr):
+        endyr.to_csv(os.path.join(tab_dir, "drift_by_prefix_end_year.csv"), index=False)
+        fig_endyr = plot_drift(endyr.rename(columns={"end_year": "filing_year"}), fig_dir,
+                               name="drift_by_prefix_end_year.png", xlabel="prefix-end year")
+
+    # ---- G drift (VERIFICATION.md G4 Check 9.3), recomputed from data/processed
+    cols_json = None
+    try:
+        from court import data_io
+        cols_json = data_io.load_columns(data_dir) if data_dir and os.path.exists(
+            os.path.join(data_dir, "court_columns.json")) else None
+    except Exception:
+        cols_json = None
+    gdrift = {}
+    for ph in sorted({phase_of(t) for t in done_fits["task"]}):
+        try:
+            smd, yearly = g_drift_stats(results_dir, data_dir, ph, cols_json)
+        except Exception as e:
+            smd, yearly = None, None; notes.append("G drift statistics, phase %d: %s" % (ph, e))
+        if smd is not None:
+            gdrift[ph] = (smd, yearly)
+        else:
+            notes.append("G drift statistics, phase %d: data/processed not available" % ph)
+    g4 = {}
+    g4_path = os.path.join(root, "verification", "g4_results.json")
+    if os.path.exists(g4_path):
+        with open(g4_path) as f:
+            g4 = json.load(f)
+
     # ---- runtime
     rt = runs[["job_id", "tier", "task", "method", "fs", "status", "runtime_s", "flags"]].copy()
     rt.to_csv(os.path.join(tab_dir, "runtime.csv"), index=False)
@@ -608,11 +816,11 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
     n_fit = (status["kind"] == "fit").sum()
     n_t1 = status[(status["kind"] == "fit") & status["queue_tier"].isin(["tier1a", "tier1b"])]
     bullets = []
-    bullets.append("Jobs: %d of %d Tier-1 fits done; %d tuning jobs done of %d; %d fits/tunings failed or timed out; "
-                   "%d Tier-1 fits not run yet." % (
+    tune1 = status[(status["kind"] == "tune") & status["queue_tier"].isin(["tier1a", "tier1b"])]
+    bullets.append("Jobs: %d of %d Tier-1 fits done; %d of %d Tier-1 tuning jobs done; %d jobs failed or timed out; "
+                   "%d Tier-1 fits not run (yet)." % (
                        (n_t1["status"] == "done").sum(), len(n_t1),
-                       ((status["kind"] == "tune") & (status["status"] == "done")).sum(),
-                       (status["kind"] == "tune").sum(),
+                       (tune1["status"] == "done").sum(), len(tune1),
                        status["status"].isin(["failed", "timeout"]).sum(),
                        (n_t1["status"].isin(["not run", "running"])).sum()))
     for task in [t for t in cfg["tasks"] if task_type_of(t) == "classification"][:2]:
@@ -640,8 +848,16 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
                                                    fmt(r["ci_low"], 3 if r["metric"] == "auc" else 1),
                                                    fmt(r["ci_high"], 3 if r["metric"] == "auc" else 1)))
         if parts_:
-            bullets.append("RQ3, global extras (FS-B0+G − FS-B0, single_agg, 95%% CI): " + "; ".join(parts_) +
+            bullets.append("RQ3, global extras (FS-B0+G − FS-B0, single_agg, 95% CI): " + "; ".join(parts_) +
                            ". For AUC higher is better, for MAE lower is better.")
+    if len(boot_r):
+        sel = boot_r[(boot_r["fs"] == "FS-B0+G") & (boot_r["method"] == "single_agg")]
+        parts_ = ["%s Δ%s %s [%s, %s]" % (TASK_NAMES.get(r["task"], r["task"]), r["metric"].upper(),
+                                          *[fmt(r[k], 3 if r["metric"] == "auc" else 1)
+                                            for k in ("delta", "ci_low", "ci_high")]) for _, r in sel.iterrows()]
+        if parts_:
+            bullets.append("Same comparison restricted to test prefixes ending on or before %s (RD-26; G drift, "
+                           "section 8): " % RESTRICT_END + "; ".join(parts_) + ".")
     flagged = runs[(runs["flags"].fillna("") != "") | (runs["status"] != "done")]
     if len(flagged):
         tune_flags = flagged[flagged["job_id"].str.startswith("tune__")]
@@ -740,6 +956,10 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
             "setting)." % budget.get("gap_train"),
             "- Tuning budget reduced to %s TPE iterations on ≤ %s segments, tuned on %s only (8-hour budget)." % (
                 tun.get("n_iter"), fint(tun.get("max_train_segments")), cfg.get("tuned_fs")),
+            "- Tuning CV uses random 3-fold splits inside the training period, as upstream does, not time-ordered "
+            "folds (RD-27).",
+            "- Test prefixes ending after %s are kept in the main tables; section 8.1 reports the restricted "
+            "evaluation (RD-26)." % RESTRICT_END,
             "- Only `single_agg` and `prefix_agg` with XGBoost in Tier 1; KNN, index-based, SVM, LSTM out of "
             "scope (D12).", ""]
     rd = parse_md_table(read_text(os.path.join(root, "RUN_DECISIONS.md")), "Time")
@@ -851,6 +1071,29 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
             sec.append("![Importance by view, FS-ALL](%s)" % rel(fig_imp, out_dir))
     else:
         sec.append("not available: no importance files for finished runs.")
+    gl = g_drift_lines(gdrift)
+    sec += ["", "**Global features under temporal drift.** The leakage review (`VERIFICATION.md`, G4 Check 9.3) "
+                "found no misalignment behind the G+ results and attributes them to drift of the G columns between "
+                "the train and test periods; tree ensembles cannot extrapolate beyond the training range. "
+                "`verification/g4_results.json` %s, so the statistics below are recomputed by this report from "
+                "`data/processed` with the runner's split (tables `g_drift_smd__p*.csv`, `g_drift_yearly__p*.csv`). "
+                "Section 8.1 repeats the ablation on test prefixes ending on or before %s." % (
+                    "holds the alignment checks but not the drift statistics" if g4 else "is not available",
+                    RESTRICT_END), ""]
+    if gl:
+        sec += ["- " + l for l in gl]
+        ys = [gdrift[ph][1] for ph in sorted(gdrift)]
+        if ys:
+            y1 = ys[0].set_index("year")
+            keep = [c for c in ("open_cases", "G_court_open_phase1", "G_judge_filed_last30", "G_judge_open")
+                    if c in y1.columns]
+            if keep:
+                tb = y1[keep].reset_index()
+                sec += ["", "Yearly means of selected global columns, phase-1 in-phase rows:", "",
+                        md_table(pd.DataFrame([dict({"year": int(r["year"])}, **{c: fmt(r[c], 1) for c in keep})
+                                               for _, r in tb.iterrows()]), headers=["Year"] + keep)]
+    else:
+        sec.append("G drift statistics not computed (data/processed not available).")
     S.append("\n".join(sec))
 
     # ================================================================ 7. Tier 2/3
@@ -896,6 +1139,40 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
             sec.append("![Drift by filing year](%s)" % rel(fig_drift, out_dir))
     else:
         sec.append("not computed: %s" % (notes[-1] if notes else "no data"))
+    sec += ["", "### 8.1 Evaluation restricted to prefixes ending on or before %s (RD-26)" % RESTRICT_END, "",
+            "Every finished Tier-1 job re-evaluated from its saved predictions, keeping only test prefixes whose "
+            "prefix-end event is dated on or before %s (the end of the D5 filing window; later court-level counts "
+            "are depleted because only closed cases are in the case table). The prefix-end date is the event at "
+            "position `n_hist + prefix_len` of the segment in `data/processed/court_phase{k}.parquet` "
+            "(`prefix_len` = in-phase length j). No retraining." % RESTRICT_END, ""]
+    if len(restr):
+        bmap = {r["job_id"]: r for _, r in boot.iterrows()} if len(boot) else {}
+        rmap = {r["job_id"]: r for _, r in boot_r.iterrows()} if len(boot_r) else {}
+        rr = restr.copy()
+        rr["fs_rank"] = rr["fs"].map({f: i for i, f in enumerate(FS_ORDER)}).fillna(99)
+        rr = rr.sort_values(["task", "tier", "method", "fs_rank"])
+        rows = []
+        for _, r in rr.iterrows():
+            nd = 3 if r["metric"] == "auc" else 1
+
+            def dci(m, jid):
+                if jid not in m:
+                    return "–"
+                b = m[jid]
+                sig = "*" if (b["ci_low"] > 0 or b["ci_high"] < 0) else ""
+                return "%s%s [%s, %s]" % (fmt(b["delta"], nd), sig, fmt(b["ci_low"], nd), fmt(b["ci_high"], nd))
+            rows.append(dict(task=TASK_NAMES.get(r["task"], r["task"]), method=r["method"], fs=r["fs"],
+                             metric=r["metric"].upper(), a=fmt(r["all"], nd), b=fmt(r["restricted"], nd),
+                             n="%s / %s" % (fint(r["n_restricted"]), fint(r["n_all"])),
+                             da=dci(bmap, r["job_id"]), db=dci(rmap, r["job_id"])))
+        sec += [md_table(pd.DataFrame(rows), headers=[
+            "Task", "Method", "FS", "Metric", "All test prefixes", "Prefixes ≤ %s" % RESTRICT_END,
+            "Prefixes kept / all", "Δ vs FS-B0, all [95% CI]", "Δ vs FS-B0, ≤ %s [95%% CI]" % RESTRICT_END[:4]]), ""]
+    else:
+        sec.append("not computed: no prefix-end dates (data/processed missing) or no finished runs.")
+    if fig_endyr:
+        sec += ["", "Test metrics by the year of the prefix-end event (Tier 1a, single_agg; table "
+                    "`drift_by_prefix_end_year.csv`):", "", "![Drift by prefix-end year](%s)" % rel(fig_endyr, out_dir)]
     S.append("\n".join(sec))
 
     # ================================================================ 9. runtime
@@ -930,6 +1207,15 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
         items.append("%d job(s) not run (%s), e.g. `%s`." % (len(g), reason, g["job_id"].iloc[0]))
     items.append("The upstream port was validated on a synthetic log only (P4 skipped: the paper's datasets were "
                  "not provided), so there is no published-AUC reproduction check.")
+    for l in g_drift_lines(gdrift, top=2):
+        items.append("G drift (VERIFICATION.md G4): " + l)
+    if gdrift:
+        items.append("The global (G/G+) features are non-stationary and partly a data artifact (closed-cases-only "
+                     "case table, judge-level break in 2016); RQ3 G conclusions should be read as 'G under temporal "
+                     "drift', see the restricted evaluation in section 8.1 (RD-26). Detrended or relative G features "
+                     "are a next step.")
+    items.append("Tuning CV uses random folds inside the training period, as upstream does (RD-27); it is optimistic "
+                 "and hides temporal drift (compare the tuning CV score in `runs.csv` with the test score).")
     items.append("Hyperparameters were tuned on %s and reused for the other feature sets of the same task and method, "
                  "which can favour %s." % (cfg.get("tuned_fs"), cfg.get("tuned_fs")))
     sec += ["Run issues:", ""] + ["- " + i for i in items]
@@ -952,7 +1238,7 @@ def build(results_dir, out_path, cfg, cfg_path, data_dir, root, do_bootstrap=Tru
 
     head = ["# Results — court-case predictive process monitoring", "",
             "*Generated by `python -m court.report` on %s from `%s` (%d runs.csv rows). Do not edit by hand.*" % (
-                time.strftime("%Y-%m-%d %H:%M"), results_dir, len(runner.read_runs(results_dir))), ""]
+                time.strftime("%Y-%m-%d %H:%M"), results_dir, len(runner.read_runs(results_dir))), "", ""]
     text = "\n".join(head) + "\n\n".join(S) + "\n"
     with open(out_path, "w") as f:
         f.write(text)
